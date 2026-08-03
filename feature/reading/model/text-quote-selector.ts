@@ -6,7 +6,7 @@ import {
 
 const CONTEXT_LENGTH = 48;
 const READING_EXACT_LENGTH = 160;
-export const ANNOTATION_EXACT_LENGTH = 300;
+export const ANNOTATION_EXACT_LENGTH = 500;
 
 const textQuoteContextSchema = z.object({
   prefix: z.string().max(CONTEXT_LENGTH),

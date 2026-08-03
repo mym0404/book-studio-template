@@ -97,7 +97,7 @@ Marketplace provisioning creates the database and credentials, but it does not r
 2. Execute the complete migration against the exact Marketplace database using the first secure capability available:
 
    - An authenticated database query tool exposed by Vercel or the installed agent.
-   - A one-off Node.js process using the already installed `@neondatabase/serverless` `Client`, with Development `DATABASE_URL` supplied by `vercel env run` or a protected env file. Read and execute the migration as one trusted SQL file; do not split SQL on semicolons.
+   - A one-off Node.js process using the already installed `postgres` client, with Development `DATABASE_URL` supplied by `vercel env run` or a protected env file. Read and execute the migration as one trusted SQL file; do not split SQL on semicolons.
    - Vercel Dashboard `Storage → database → Browser → Query` through an agent-controlled authenticated browser.
    - An already installed `psql` client.
    - Neon SQL Editor opened from the Marketplace resource.
@@ -106,7 +106,7 @@ Marketplace provisioning creates the database and credentials, but it does not r
 4. Query the schema and confirm all six tables exist: `reading_progress`, `annotations`, `public_pages`, `owner_auth`, `auth_sessions`, and `auth_challenges`.
 5. If Production and Development point to different databases, apply and verify the migration once in each new database. Compare resource identifiers or hostnames without printing connection strings.
 
-Do not treat a successful Next.js build as a database check; this repository can build without connecting to Neon.
+Do not treat a successful Next.js build as a database check; this repository can build without connecting to PostgreSQL.
 
 ## 7. Configure the canonical origin and setup token
 

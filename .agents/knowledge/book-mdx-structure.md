@@ -6,7 +6,9 @@ General Markdown and MDX component syntax are outside this document. Use the Mar
 
 ## Content Boundaries
 
-- `books/` stores original book files. This document does not prescribe its internal directory structure.
+- The ignored `books/` directory stores original book files. The tracked
+  `examples/sample-book.pdf` is the public sample, not a storage convention for
+  user books. This document does not prescribe the internal `books/` structure.
 - `content/docs/` is the only source of MDX pages and navigation metadata rendered by the documentation site.
 - `content-assets/books/` stores images referenced by rendered book MDX.
 - `source.config.ts` registers `content/docs` as the Fumadocs MDX content directory.

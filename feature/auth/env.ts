@@ -3,14 +3,18 @@ import { z } from 'zod';
 
 const requiredEnvironmentVariableSchema = z.string().trim().min(1);
 
+const authModeSchema = z.enum(['bypass', 'passkey']);
+
 const siteUrlSchema = z
-  .url({ error: 'SITE_URL must be an HTTPS origin' })
+  .url({ error: 'SITE_URL must be HTTPS or use http://localhost' })
   .refine(
     (siteUrl) => {
       const parsedUrl = new URL(siteUrl);
 
       return (
-        parsedUrl.protocol === 'https:' &&
+        (parsedUrl.protocol === 'https:' ||
+          (parsedUrl.protocol === 'http:' &&
+            parsedUrl.hostname === 'localhost')) &&
         !parsedUrl.username &&
         !parsedUrl.password &&
         parsedUrl.pathname === '/' &&
@@ -18,7 +22,7 @@ const siteUrlSchema = z
         !parsedUrl.hash
       );
     },
-    { error: 'SITE_URL must be an HTTPS origin' },
+    { error: 'SITE_URL must be HTTPS or use http://localhost' },
   );
 
 const ownerSetupTokenSchema = z
@@ -33,7 +37,7 @@ const readRequiredEnv = (name: string) => {
   });
 };
 
-/** Derives both WebAuthn identifiers from the canonical HTTPS SITE_URL origin. */
+/** Derives both WebAuthn identifiers from the canonical SITE_URL origin. */
 export const getAuthEnv = (siteUrl = readRequiredEnv('SITE_URL')) => {
   const parsedUrl = new URL(siteUrlSchema.parse(siteUrl));
 
@@ -60,5 +64,12 @@ export const isValidOwnerSetupToken = ({
   return timingSafeEqual(candidateHash, configuredHash);
 };
 
-export const isDevelopmentAuthBypass = (nodeEnv = process.env.NODE_ENV) =>
-  nodeEnv === 'development';
+export const isAuthBypass = ({
+  authMode = process.env.AUTH_MODE,
+  nodeEnv = process.env.NODE_ENV,
+}: {
+  authMode?: string;
+  nodeEnv?: string;
+} = {}) =>
+  authModeSchema.parse(authMode ?? 'passkey') === 'bypass' &&
+  nodeEnv !== 'production';

@@ -38,11 +38,11 @@
 
 ## Access control
 
-- Development mode bypasses authentication. Production requires the one registered owner passkey and a stored database session.
+- `pnpm dev` sets `AUTH_MODE=bypass`. Unset `AUTH_MODE`, E2E, and production use passkey authentication, and production never bypasses authentication.
 - When no owner exists, `/sign-in` requires `OWNER_SETUP_TOKEN` before registering the passkey. There is no password, logout endpoint, or recovery UI.
 - `proxy.ts` only performs a coarse cookie-presence redirect. Protected pages and route handlers must enforce authorization with `requireOwnerPage()` or `requireOwnerRequest()`.
 - Private route responses must use `PRIVATE_NO_STORE_HEADERS` or `withPrivateNoStore()`.
-- Keep `SITE_URL` as the single WebAuthn origin and relying-party source.
+- Keep `SITE_URL` as the single WebAuthn origin and relying-party source. It accepts HTTPS origins and `http://localhost[:port]` for local passkey tests.
 
 ## Change discipline
 

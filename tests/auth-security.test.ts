@@ -6,7 +6,7 @@ import {
 } from '../feature/auth/constants';
 import {
   getAuthEnv,
-  isDevelopmentAuthBypass,
+  isAuthBypass,
   isValidOwnerSetupToken,
 } from '../feature/auth/env';
 import {
@@ -44,10 +44,20 @@ describe('authentication security helpers', () => {
     assert.equal(hashOpaqueToken(first), hashOpaqueToken(first));
   });
 
-  it('bypasses passkey authentication only in development', () => {
-    assert.equal(isDevelopmentAuthBypass('development'), true);
-    assert.equal(isDevelopmentAuthBypass('production'), false);
-    assert.equal(isDevelopmentAuthBypass('test'), false);
+  it('bypasses passkey authentication only when explicitly enabled', () => {
+    assert.equal(
+      isAuthBypass({ authMode: 'bypass', nodeEnv: 'development' }),
+      true,
+    );
+    assert.equal(
+      isAuthBypass({ authMode: 'passkey', nodeEnv: 'development' }),
+      false,
+    );
+    assert.equal(isAuthBypass({ nodeEnv: 'development' }), false);
+    assert.equal(
+      isAuthBypass({ authMode: 'bypass', nodeEnv: 'production' }),
+      false,
+    );
   });
 
   it('keeps authentication state out of unrelated cookies', () => {
@@ -80,6 +90,10 @@ describe('authentication security helpers', () => {
     assert.deepEqual(getAuthEnv('https://books.example.com'), {
       origin: 'https://books.example.com',
       rpId: 'books.example.com',
+    });
+    assert.deepEqual(getAuthEnv('http://localhost:3100'), {
+      origin: 'http://localhost:3100',
+      rpId: 'localhost',
     });
     assert.throws(() => getAuthEnv('http://books.example.com'));
     assert.throws(() => getAuthEnv('https://books.example.com/docs'));

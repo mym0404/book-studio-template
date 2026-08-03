@@ -1,7 +1,7 @@
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 import { type NextRequest, NextResponse } from 'next/server';
 import { SESSION_COOKIE_NAME } from '@/feature/auth/constants';
-import { isDevelopmentAuthBypass } from '@/feature/auth/env';
+import { isAuthBypass } from '@/feature/auth/env';
 import {
   docsContentRoute,
   docsRoute,
@@ -43,7 +43,7 @@ export const proxy = (request: NextRequest) => {
     return NextResponse.next();
   }
 
-  if (!isDevelopmentAuthBypass() && !request.cookies.has(SESSION_COOKIE_NAME)) {
+  if (!isAuthBypass() && !request.cookies.has(SESSION_COOKIE_NAME)) {
     const destination = new URL('/sign-in', request.url);
 
     return NextResponse.redirect(destination);

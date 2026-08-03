@@ -1,4 +1,4 @@
-import { getAuthEnv, isDevelopmentAuthBypass } from '@/feature/auth/env';
+import { getAuthEnv, isAuthBypass } from '@/feature/auth/env';
 
 export const getCookieValue = (cookieHeader: string | null, name: string) => {
   if (!cookieHeader) return undefined;
@@ -23,7 +23,7 @@ export const hasTrustedOrigin = (request: Request) =>
 
 /** Checks the mutation origin only; callers must enforce the owner session first. */
 export const hasMutationAccess = (request: Request) =>
-  isDevelopmentAuthBypass() || hasTrustedOrigin(request);
+  isAuthBypass() || hasTrustedOrigin(request);
 
 /** Prevents authenticated content from being stored or reused across cookie identities. */
 export const PRIVATE_NO_STORE_HEADERS = {

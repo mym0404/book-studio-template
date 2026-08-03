@@ -10,7 +10,7 @@ General Markdown and MDX component syntax are outside this document. Use the Mar
 - `content/docs/` is the only source of MDX pages and navigation metadata rendered by the documentation site.
 - `content-assets/books/` stores images referenced by rendered book MDX.
 - `source.config.ts` registers `content/docs` as the Fumadocs MDX content directory.
-- `lib/source.ts` loads that content at the `/docs` base URL and resolves icon names through `lucideIconsPlugin()`.
+- `feature/library/source.ts` loads that content at the `/docs` base URL and resolves icon names through `lucideIconsPlugin()`.
 - Keep original files separate from rendered MDX and its assets. Do not render files from `books/` directly.
 
 ## Required Book Layout

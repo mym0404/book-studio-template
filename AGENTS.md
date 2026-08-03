@@ -13,7 +13,7 @@
 - Use English for website UI, navigation, metadata, search, published summaries, and reading notes. Source quotations may preserve their original language.
 - Build the app with the Next.js App Router, React, TypeScript, Tailwind CSS, Fumadocs MDX, and Fumadocs UI.
 - Use Node.js 24 and pnpm through the versions pinned by mise and `package.json`.
-- `lib/source.ts` supplies both the documentation pages and search index. `app/docs` renders its page tree.
+- `feature/library/source.ts` supplies both the documentation pages and search index. `app/docs` renders its page tree.
 
 ## Setup and external actions
 
@@ -34,7 +34,7 @@
 
 - Neon stores reading progress, annotations, one registered passkey, one-time WebAuthn challenges, and SHA-256 hashes of opaque sessions.
 - Reading progress applies only to chapters. Annotations may apply to a book landing page or chapter and use an `exact`, `prefix`, and `suffix` text quote selector.
-- `/docs/<book-slug>/saved` is a protected virtual view supplied by `lib/source.ts`. Do not author it under `content/docs`.
+- `/docs/<book-slug>/saved` is a protected virtual view supplied by `feature/library/source.ts`. Do not author it under `content/docs`.
 - A `public_pages` row publishes one page at `/public/<book-slug>[/<chapter-slug>]`. Public routes must return `404` without that row, and public image routes must repeat the publication check.
 
 ## Access control

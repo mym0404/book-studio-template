@@ -22,7 +22,7 @@ Keep CLI processes alive while the user completes a browser approval, then resum
 
 ## 1. Establish authority and defaults
 
-1. Read `AGENTS.md`, `mise.toml`, `package.json`, `.env.example`, and `db/migrations/001_initial.sql` in full.
+1. Read `AGENTS.md`, its relevant routed knowledge documents, `mise.toml`, `package.json`, and `.env.example` in full.
 2. Determine whether the request is local-only or includes production. For an unqualified install request, propose the full production path and ask once for permission to create or connect the Vercel project, connect its Git repository, provision a no-cost Neon Marketplace database, set environment variables, and deploy.
 3. Use these defaults unless the user already chose otherwise:
 
@@ -91,22 +91,22 @@ If Marketplace terms or account approval opens in a browser, keep the provisioni
 
 ## 6. Apply and verify the database schema
 
-Marketplace provisioning creates the database and credentials, but it does not run `db/migrations/001_initial.sql`.
+Marketplace provisioning creates the database and credentials, but it does not apply the application schema owned by the Database knowledge document.
 
-1. Confirm that the target is the newly provisioned empty database. For a reused database, inspect its schema first and get confirmation before changing it. `CREATE TABLE IF NOT EXISTS` does not repair an incompatible existing table.
-2. Execute the complete migration against the exact Marketplace database using the first secure capability available:
+1. Confirm that the target is the newly provisioned empty database. For a reused database, follow the Database knowledge document before changing it.
+2. Execute the complete migration owned by the Database knowledge document against the exact Marketplace database using the first secure capability available:
 
    - An authenticated database query tool exposed by Vercel or the installed agent.
-   - A one-off Node.js process using the already installed `postgres` client, with Development `DATABASE_URL` supplied by `vercel env run` or a protected env file. Read and execute the migration as one trusted SQL file; do not split SQL on semicolons.
+   - A one-off Node.js process using the already installed `postgres` client, with Development `DATABASE_URL` supplied by `vercel env run` or a protected env file.
    - Vercel Dashboard `Storage → database → Browser → Query` through an agent-controlled authenticated browser.
    - An already installed `psql` client.
    - Neon SQL Editor opened from the Marketplace resource.
 
 3. If none of those paths is available, ask the user for one action: open the Vercel database Query screen, paste the full migration file, and select **Run**. Do not ask them to create another database or copy credentials.
-4. Query the schema and confirm all six tables exist: `reading_progress`, `annotations`, `public_pages`, `owner_auth`, `auth_sessions`, and `auth_challenges`.
+4. Query the schema and confirm every table required by the Database knowledge document exists.
 5. If Production and Development point to different databases, apply and verify the migration once in each new database. Compare resource identifiers or hostnames without printing connection strings.
 
-Do not treat a successful Next.js build as a database check; this repository can build without connecting to PostgreSQL.
+Apply the Database knowledge document's runtime verification boundary before continuing.
 
 ## 7. Configure the canonical origin and setup token
 
@@ -166,7 +166,7 @@ Fix only failures caused by installation. Report pre-existing failures separatel
 | `DATABASE_URL` was not injected | Reconnect the existing resource, select Production and Development, then pull again | None unless team permission is missing |
 | Env pull would overwrite `.env.local` | Pull to an ignored temporary file and merge required keys | None |
 | No automated SQL executor is available | Open Vercel's database Query screen with the migration ready | Paste the file and select **Run** |
-| Build passes but auth API returns `503` | Diagnose DB connectivity and the six-table schema | None |
+| Build passes but auth API returns `503` | Diagnose DB connectivity and the schema owned by the Database knowledge document | None |
 | Deployment Protection returns `401` or `403` | Retry with an authenticated Vercel request before diagnosing app auth | Approve Vercel access if required |
 | Production alias differs from `SITE_URL` | Update `SITE_URL`, redeploy, and test only the canonical origin | Complete DNS only for a requested custom domain |
 | Agent browser cannot create a passkey | Hand off the exact production URL and private local token location | Enter the token and complete the passkey prompt |

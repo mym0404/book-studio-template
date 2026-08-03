@@ -71,33 +71,6 @@
    Read .agents/install-guide.md and install Book Studio.
    ```
 
-## Local PostgreSQL
-
-The application accepts any PostgreSQL connection string, including a local database. With Docker installed, start a development database:
-
-```sh
-docker run --name book-studio-db \
-  -e POSTGRES_USER=book_studio \
-  -e POSTGRES_PASSWORD=book_studio \
-  -e POSTGRES_DB=book_studio \
-  -p 5432:5432 \
-  -d postgres:17
-```
-
-Apply the schema only to this fresh database:
-
-```sh
-docker exec -i book-studio-db \
-  psql -U book_studio -d book_studio \
-  < db/migrations/001_initial.sql
-```
-
-Create `.env.local`, then restart the development server:
-
-```dotenv
-DATABASE_URL=postgresql://book_studio:book_studio@localhost:5432/book_studio
-```
-
 ## License
 
 The source code, sample PDF, and sample generated content are available under the [MIT License](LICENSE). Imported books remain subject to their original copyright and license terms.

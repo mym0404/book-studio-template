@@ -6,6 +6,7 @@
   router to topic documents. Each routed document owns its assigned facts, and
   each durable fact appears in one owner.
 - [Book MDX Structure](.agents/knowledge/book-mdx-structure.md) owns source and rendered-content boundaries, asset paths, book layout, slugs, metadata contracts, and page ordering.
+- [Database](.agents/knowledge/db.md) owns PostgreSQL provider portability, connection configuration, persisted application state, schema application, and local database setup.
 - [Markdown Syntax](.agents/knowledge/markdown-syntax.md) owns Fumadocs-specific MDX components, code block extensions, and compiler caveats.
 - Read the relevant routed document in full before changing book content or authoring rules. Keep each durable fact in one owner.
 
@@ -22,7 +23,6 @@
 - Review and run `mise trust`, then run `mise install` before repository commands. Use `mise exec -- pnpm <command>` when the shell does not activate mise automatically.
 - Do not create or change GitHub, Neon, or Vercel resources, change repository visibility, store external secrets, commit, push, or deploy without explicit user authorization.
 - Never print or commit `.env.local`, `DATABASE_URL`, or `OWNER_SETUP_TOKEN`.
-- Treat `db/migrations/001_initial.sql` as the schema for a fresh PostgreSQL database, including Neon. Do not run it against an existing database without the user's confirmation.
 
 ## PDF import and generated content
 
@@ -32,7 +32,6 @@
 
 ## Reading state and public pages
 
-- PostgreSQL stores reading progress, annotations, one registered passkey, one-time WebAuthn challenges, and SHA-256 hashes of opaque sessions.
 - Reading progress applies only to chapters. Annotations may apply to a book landing page or chapter and use an `exact`, `prefix`, and `suffix` text quote selector.
 - `/docs/<book-slug>/saved` is a protected virtual view supplied by `feature/library/source.ts`. Do not author it under `content/docs`.
 - A `public_pages` row publishes one page at `/public/<book-slug>[/<chapter-slug>]`. Public routes must return `404` without that row, and public image routes must repeat the publication check.

@@ -1,29 +1,71 @@
-# Book Studio
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./public/logo.png">
+    <source media="(prefers-color-scheme: light)" srcset="./app/icon.png">
+    <img src="./app/icon.png" alt="Book Studio logo" width="120">
+  </picture>
+</p>
 
-Book Studio turns PDFs into a private reading site with searchable chapters, reading progress, highlights, and notes. It is designed for one owner and uses a passkey in production.
+<h1 align="center">Book Studio</h1>
 
-Generated MDX and images are committed to Git. Use a private repository for copyrighted, confidential, or personal material.
+<p align="center">
+  <strong>Turn your ugly PDFs into a polished Fumadocs reading experience that only you can access.</strong>
+</p>
+
+<p align="center">
+  A private, single-owner bookshelf with search, highlights, notes, reading progress, and controlled page sharing.
+</p>
+
+<p align="center">
+  <a href="https://github.com/mym0404/book-studio-template/generate">
+    <img src="https://img.shields.io/badge/Use_this_template-181717?style=for-the-badge&amp;logo=github&amp;logoColor=white" alt="Use this template">
+  </a>
+  <a href=".agents/install-guide.md">
+    <img src="https://img.shields.io/badge/Install_with_AI-5B5BD6?style=for-the-badge" alt="Install with an AI agent">
+  </a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js_16-000000?style=flat-square&amp;logo=nextdotjs&amp;logoColor=white" alt="Next.js 16">
+  <img src="https://img.shields.io/badge/Fumadocs-111827?style=flat-square" alt="Fumadocs">
+  <img src="https://img.shields.io/badge/Neon-00E699?style=flat-square&amp;logo=neon&amp;logoColor=black" alt="Neon">
+  <img src="https://img.shields.io/badge/Vercel-000000?style=flat-square&amp;logo=vercel&amp;logoColor=white" alt="Vercel">
+</p>
+
+---
+
+> [!IMPORTANT]
+> Generated MDX and images are committed to Git. Use a private repository for copyrighted, confidential, or personal material.
 
 ## Features
 
-- **Private Bookshelf** — Keep a single-owner library protected by a passkey.
-- **Ready-to-Use PDF Import Skill** — Turn a PDF into a structured, source-checked book with `$import-book`.
-- **Highlights & Comments** — Highlight passages and attach comments while you read.
-- **Continue Reading** — Resume from your latest reading position.
-- **Page Sharing** — Publish one specific page at a time with a stable public link.
+| Feature | What you get |
+| --- | --- |
+| **Private Bookshelf** | Keep a single-owner library protected by a passkey. |
+| **Ready-to-Use PDF Import Skill** | Turn a PDF into a structured, source-checked book with `$import-book`. |
+| **Highlights & Comments** | Highlight passages and attach comments while you read. |
+| **Continue Reading** | Resume from your latest reading position. |
+| **Page Sharing** | Publish one specific page at a time with a stable public link. |
+
+## Constraints
+
+> [!NOTE]
+> The built-in installation flow currently requires **Vercel** and a **Neon database provisioned through the Vercel Marketplace**.
+>
+> You can freely clone the repository and adapt it to your own infrastructure instead.
 
 ## Get Started
 
-1. Open [Book Studio](https://github.com/mym0404/book-studio-template), select **Use this template**, and create your repository.
-2. Clone your new repository:
+1. **Create your repository.** Open [Book Studio](https://github.com/mym0404/book-studio-template), select **Use this template**, and create your repository.
+2. **Clone it.**
 
    ```sh
    git clone https://github.com/YOUR_ACCOUNT/YOUR_REPOSITORY.git
    cd YOUR_REPOSITORY
    ```
 
-3. Open the cloned project in your favorite AI coding agent.
-4. **Use Your AI Agent.** Ask it to follow the [installation guide](.agents/install-guide.md):
+3. **Open it.** Open the cloned project in your favorite AI coding agent.
+4. **Use your AI agent.** Ask it to follow the [agent installation guide](.agents/install-guide.md):
 
    ```text
    Read .agents/install-guide.md and install Book Studio.

@@ -3,27 +3,27 @@ import { describe, it } from 'node:test';
 import {
   CHALLENGE_EXPIRES_SECONDS,
   SESSION_EXPIRES_SECONDS,
-} from '../lib/auth/constants';
+} from '../feature/auth/constants';
 import {
   getAuthEnv,
   isDevelopmentAuthBypass,
   isValidOwnerSetupToken,
-} from '../lib/auth/env';
+} from '../feature/auth/env';
 import {
   createAuthenticationOptions,
   createRegistrationOptions,
-} from '../lib/auth/passkey';
-import { getCookieValue } from '../lib/auth/security';
+} from '../feature/auth/passkey';
+import { getCookieValue } from '../feature/auth/security';
 import {
   createOpaqueToken,
   hashOpaqueToken,
   isOpaqueToken,
-} from '../lib/auth/tokens';
+} from '../feature/auth/tokens';
 import {
   getPublicAssetContentDigest,
   getPublicAssetUrl,
   hasValidPublicAssetSignature,
-} from '../lib/public-assets';
+} from '../feature/sharing/public-assets';
 
 describe('authentication security helpers', () => {
   it('reads only the requested cookie', () => {

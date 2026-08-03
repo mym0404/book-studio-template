@@ -1,7 +1,7 @@
 import { createFromSource } from 'fumadocs-core/search/server';
-import { withPrivateNoStore } from '@/lib/auth/security';
-import { requireOwnerRequest } from '@/lib/auth/session';
-import { source } from '@/lib/source';
+import { withPrivateNoStore } from '@/feature/auth/security';
+import { requireOwnerRequest } from '@/feature/auth/session';
+import { source } from '@/feature/library/source';
 
 export const dynamic = 'force-dynamic';
 

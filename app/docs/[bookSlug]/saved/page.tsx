@@ -8,22 +8,23 @@ import { BookOpen, Globe, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { SavedHighlights } from '@/components/saved-highlights';
-import { SharePageButton } from '@/components/share-page-button';
-import { getAnnotationsForBook } from '@/lib/annotations';
-import { requireOwnerPage } from '@/lib/auth/session';
-import { getPublicPageUrl } from '@/lib/public-page';
-import { getPublishedPageUrlsForBook } from '@/lib/public-pages';
-import { getReadingProgressForBook, isBookSlug } from '@/lib/reading-progress';
 import {
   getBookTitle,
   getPageTitle,
   getSavedHighlightGroups,
   getSavedHighlightsMarkdown,
   getSavedHighlightsMarkdownVersion,
-} from '@/lib/saved-highlights';
-import { docsContentRoute } from '@/lib/shared';
-import { getBookPageUrls } from '@/lib/source';
+} from '@/feature/annotations/logic/saved-highlights';
+import { getAnnotationsForBook } from '@/feature/annotations/repositories/annotations';
+import { SavedHighlights } from '@/feature/annotations/ui/saved-highlights';
+import { requireOwnerPage } from '@/feature/auth/session';
+import { docsContentRoute } from '@/feature/common/app';
+import { isBookSlug } from '@/feature/library/books';
+import { getBookPageUrls } from '@/feature/library/source';
+import { getReadingProgressForBook } from '@/feature/reading/repositories/reading-progress';
+import { getPublicPageUrl } from '@/feature/sharing/public-page';
+import { getPublishedPageUrlsForBook } from '@/feature/sharing/repositories/public-pages';
+import { SharePageButton } from '@/feature/sharing/ui/share-page-button';
 
 const SavedItem = ({
   children,
@@ -37,14 +38,20 @@ const SavedItem = ({
   title: string;
 }) => (
   <Link
-    className="flex items-center gap-3 rounded-xl border bg-fd-card px-3 py-2.5 text-start transition-colors hover:bg-fd-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring"
+    className={
+      'flex items-center gap-3 rounded-xl border bg-fd-card px-3 py-2.5 text-start transition-colors hover:bg-fd-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring'
+    }
     href={href}
   >
-    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-fd-secondary text-fd-muted-foreground">
-      <Icon aria-hidden="true" className="size-4" />
+    <span
+      className={
+        'flex size-8 shrink-0 items-center justify-center rounded-lg bg-fd-secondary text-fd-muted-foreground'
+      }
+    >
+      <Icon aria-hidden={'true'} className={'size-4'} />
     </span>
-    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-      <span className="truncate text-sm font-medium text-fd-foreground">
+    <span className={'flex min-w-0 flex-1 flex-col gap-0.5'}>
+      <span className={'truncate text-sm font-medium text-fd-foreground'}>
         {title}
       </span>
       {children}
@@ -62,8 +69,8 @@ const SavedSection = ({
   const id = `saved-${title.toLowerCase().replaceAll(' ', '-')}`;
 
   return (
-    <section className="flex flex-col gap-3" aria-labelledby={id}>
-      <h2 className="text-lg font-semibold" id={id}>
+    <section className={'flex flex-col gap-3'} aria-labelledby={id}>
+      <h2 className={'text-lg font-semibold'} id={id}>
         {title}
       </h2>
       {children}
@@ -71,9 +78,7 @@ const SavedSection = ({
   );
 };
 
-export default async function SavedPage(
-  props: PageProps<'/docs/[bookSlug]/saved'>,
-) {
+const SavedPage = async (props: PageProps<'/docs/[bookSlug]/saved'>) => {
   await requireOwnerPage();
 
   const { bookSlug } = await props.params;
@@ -116,43 +121,45 @@ export default async function SavedPage(
         Your reading progress, published pages, and annotations in this book.
       </DocsDescription>
       {annotationGroups.length > 0 ? (
-        <div className="flex flex-row items-center gap-2 border-b pb-6">
+        <div className={'flex flex-row items-center gap-2 border-b pb-6'}>
           <MarkdownCopyButton markdownUrl={markdownUrl}>
             Copy Highlights
           </MarkdownCopyButton>
         </div>
       ) : undefined}
-      <div className="flex flex-col gap-10 pb-8">
-        <SavedSection title="Last read">
+      <div className={'flex flex-col gap-10 pb-8'}>
+        <SavedSection title={'Last read'}>
           {progress ? (
             <SavedItem
               href={progress.pageUrl}
               icon={BookOpen}
               title={progress.pageTitle ?? progress.pageUrl}
             >
-              <span className="truncate text-sm text-fd-muted-foreground">
+              <span className={'truncate text-sm text-fd-muted-foreground'}>
                 {progress.selector?.exact}
               </span>
             </SavedItem>
           ) : (
-            <p className="text-sm text-fd-muted-foreground">
+            <p className={'text-sm text-fd-muted-foreground'}>
               No saved reading position yet.
             </p>
           )}
         </SavedSection>
 
-        <SavedSection title="Published">
+        <SavedSection title={'Published'}>
           {publishedPages.length > 0 ? (
-            <div className="flex flex-col gap-2">
+            <div className={'flex flex-col gap-2'}>
               {publishedPages.map(({ pageUrl, title }) => (
-                <div className="flex items-center gap-2" key={pageUrl}>
-                  <div className="min-w-0 flex-1">
+                <div className={'flex items-center gap-2'} key={pageUrl}>
+                  <div className={'min-w-0 flex-1'}>
                     <SavedItem
                       href={getPublicPageUrl({ pageUrl })}
                       icon={Globe}
                       title={title}
                     >
-                      <span className="truncate text-sm text-fd-muted-foreground">
+                      <span
+                        className={'truncate text-sm text-fd-muted-foreground'}
+                      >
                         {getPublicPageUrl({ pageUrl })}
                       </span>
                     </SavedItem>
@@ -167,7 +174,7 @@ export default async function SavedPage(
               ))}
             </div>
           ) : (
-            <p className="text-sm text-fd-muted-foreground">
+            <p className={'text-sm text-fd-muted-foreground'}>
               No published pages yet.
             </p>
           )}
@@ -177,4 +184,6 @@ export default async function SavedPage(
       </div>
     </DocsPage>
   );
-}
+};
+
+export default SavedPage;

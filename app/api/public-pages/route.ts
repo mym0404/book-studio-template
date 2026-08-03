@@ -1,8 +1,10 @@
-import { isDevelopmentAuthBypass } from '@/lib/auth/env';
-import { hasTrustedOrigin, withPrivateNoStore } from '@/lib/auth/security';
-import { requireOwnerRequest } from '@/lib/auth/session';
-import { getShareablePage } from '@/lib/public-page';
-import { publishPage, unpublishPage } from '@/lib/public-pages';
+import { hasMutationAccess, withPrivateNoStore } from '@/feature/auth/security';
+import { requireOwnerRequest } from '@/feature/auth/session';
+import { getShareablePage } from '@/feature/sharing/public-page';
+import {
+  publishPage,
+  unpublishPage,
+} from '@/feature/sharing/repositories/public-pages';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,9 +13,6 @@ const badRequest = () =>
 
 const unauthorized = () =>
   withPrivateNoStore(new Response(null, { status: 401 }));
-
-const hasMutationAccess = (request: Request) =>
-  isDevelopmentAuthBypass() || hasTrustedOrigin(request);
 
 const getPageUrl = async (request: Request) => {
   const body: unknown = await request.json().catch(() => undefined);

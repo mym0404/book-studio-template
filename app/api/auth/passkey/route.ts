@@ -4,17 +4,17 @@ import {
   CHALLENGE_EXPIRES_SECONDS,
   SESSION_COOKIE_NAME,
   SESSION_EXPIRES_SECONDS,
-} from '@/lib/auth/constants';
+} from '@/feature/auth/constants';
 import {
   createPasskeyOptions,
   getPasskeyMode,
   verifyOwnerPasskey,
-} from '@/lib/auth/passkey';
+} from '@/feature/auth/passkey';
 import {
   getCookieValue,
   hasTrustedOrigin,
   PRIVATE_NO_STORE_HEADERS,
-} from '@/lib/auth/security';
+} from '@/feature/auth/security';
 
 export const dynamic = 'force-dynamic';
 

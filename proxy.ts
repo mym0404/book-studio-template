@@ -1,13 +1,13 @@
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 import { type NextRequest, NextResponse } from 'next/server';
-import { SESSION_COOKIE_NAME } from '@/lib/auth/constants';
-import { isDevelopmentAuthBypass } from '@/lib/auth/env';
+import { SESSION_COOKIE_NAME } from '@/feature/auth/constants';
+import { isDevelopmentAuthBypass } from '@/feature/auth/env';
 import {
   docsContentRoute,
   docsRoute,
   publicAssetRoute,
   publicPageRoute,
-} from '@/lib/shared';
+} from '@/feature/common/app';
 
 const REMOVED_AUTH_PAGES = ['/enroll', '/settings/passkeys'];
 const { rewrite: rewriteDocs } = rewritePath(

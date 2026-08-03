@@ -8,19 +8,17 @@ import { ThemeSwitch } from 'fumadocs-ui/layouts/shared/slots/theme-switch';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
-import { getPublicMDXComponents } from '@/components/public-mdx';
-import { PublicPageAnnotations } from '@/components/public-page-annotations';
-import {
-  ReaderSettingsControl,
-  ReaderSettingsProvider,
-} from '@/components/reader-settings';
-import readerStyles from '@/components/reader-settings.module.css';
-import { getAnnotations } from '@/lib/annotations';
-import { getPublicAssetContentDigest } from '@/lib/public-assets';
-import { getShareablePage } from '@/lib/public-page';
-import { getPublicPageAssetSecret } from '@/lib/public-pages';
-import { docsRoute } from '@/lib/shared';
-import { source } from '@/lib/source';
+import { getAnnotations } from '@/feature/annotations/repositories/annotations';
+import { PublicPageAnnotations } from '@/feature/annotations/ui/public-page-annotations';
+import { docsRoute } from '@/feature/common/app';
+import { source } from '@/feature/library/source';
+import readerStyles from '@/feature/reading/ui/reader-settings.module.css';
+import { ReaderSettingsControl } from '@/feature/reading/ui/reader-settings-control';
+import { ReaderSettingsProvider } from '@/feature/reading/ui/reader-settings-provider';
+import { getPublicAssetContentDigest } from '@/feature/sharing/public-assets';
+import { getShareablePage } from '@/feature/sharing/public-page';
+import { getPublicPageAssetSecret } from '@/feature/sharing/repositories/public-pages';
+import { getPublicMDXComponents } from '@/feature/sharing/ui/public-mdx';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,9 +37,7 @@ const getPublishedPage = cache(async (slugPath: string) => {
   return { assetSecret, page: shareablePage.page };
 });
 
-export default async function PublicPage(
-  props: PageProps<'/public/[[...slug]]'>,
-) {
+const PublicPage = async (props: PageProps<'/public/[[...slug]]'>) => {
   const params = await props.params;
   const publishedPage = await getPublishedPage(params.slug?.join('/') ?? '');
 
@@ -98,11 +94,11 @@ export default async function PublicPage(
       </main>
     </ReaderSettingsProvider>
   );
-}
+};
 
-export async function generateMetadata(
+export const generateMetadata = async (
   props: PageProps<'/public/[[...slug]]'>,
-): Promise<Metadata> {
+): Promise<Metadata> => {
   const params = await props.params;
   const publishedPage = await getPublishedPage(params.slug?.join('/') ?? '');
 
@@ -124,4 +120,6 @@ export async function generateMetadata(
       title: page.data.title,
     },
   };
-}
+};
+
+export default PublicPage;

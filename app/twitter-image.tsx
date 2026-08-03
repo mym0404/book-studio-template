@@ -1,10 +1,10 @@
-import { requireOwnerPage } from '@/lib/auth/session';
+import { requireOwnerPage } from '@/feature/auth/session';
+import { appDescription, appName } from '@/feature/common/app';
 import {
   createBrandOgImage,
   ogImageContentType,
   ogImageSize,
-} from '@/lib/og-image';
-import { appDescription, appName } from '@/lib/shared';
+} from '@/feature/common/ui/brand-og-image';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,11 +12,13 @@ export const alt = `${appName} logo and introduction`;
 export const size = ogImageSize;
 export const contentType = ogImageContentType;
 
-export default async function TwitterImage() {
+const TwitterImage = async () => {
   await requireOwnerPage();
 
   return createBrandOgImage({
     title: appName,
     description: appDescription,
   });
-}
+};
+
+export default TwitterImage;

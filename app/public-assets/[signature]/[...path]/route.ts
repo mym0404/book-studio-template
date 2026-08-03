@@ -1,10 +1,13 @@
-import { getBookAssetResponse } from '@/lib/book-assets';
+import { getBookAssetResponse } from '@/feature/library/assets';
 import {
   getPublicAssetContentDigest,
   hasValidPublicAssetSignature,
-} from '@/lib/public-assets';
-import { getShareablePage, PUBLIC_NO_STORE_HEADERS } from '@/lib/public-page';
-import { getPublicPageAssetSecret } from '@/lib/public-pages';
+} from '@/feature/sharing/public-assets';
+import {
+  getShareablePage,
+  PUBLIC_NO_STORE_HEADERS,
+} from '@/feature/sharing/public-page';
+import { getPublicPageAssetSecret } from '@/feature/sharing/repositories/public-pages';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,14 +1,14 @@
 import { notFound } from 'next/navigation';
-import { getAnnotationsForBook } from '@/lib/annotations';
-import { withPrivateNoStore } from '@/lib/auth/security';
-import { requireOwnerRequest } from '@/lib/auth/session';
-import { isBookSlug } from '@/lib/reading-progress';
 import {
   getBookTitle,
   getSavedHighlightGroups,
   getSavedHighlightsMarkdown,
-} from '@/lib/saved-highlights';
-import { getLLMText, source } from '@/lib/source';
+} from '@/feature/annotations/logic/saved-highlights';
+import { getAnnotationsForBook } from '@/feature/annotations/repositories/annotations';
+import { withPrivateNoStore } from '@/feature/auth/security';
+import { requireOwnerRequest } from '@/feature/auth/session';
+import { isBookSlug } from '@/feature/library/books';
+import { getLLMText, source } from '@/feature/library/source';
 
 export const dynamic = 'force-dynamic';
 

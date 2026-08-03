@@ -3,8 +3,8 @@ import './global.css';
 import 'katex/dist/katex.css';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
-import { READER_SETTINGS_SCRIPT } from '@/lib/reader-settings';
-import { appDescription, appName, getMetadataBase } from '@/lib/shared';
+import { appDescription, appName, getMetadataBase } from '@/feature/common/app';
+import { READER_SETTINGS_SCRIPT } from '@/feature/reading/model/reader-settings';
 
 const wantedSans = localFont({
   src: './fonts/wanted-sans/WantedSansVariable.woff2',
@@ -40,10 +40,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Layout({ children }: LayoutProps<'/'>) {
+const Layout = ({ children }: LayoutProps<'/'>) => {
   return (
-    <html lang="en" className={wantedSans.variable} suppressHydrationWarning>
-      <body className="flex flex-col min-h-screen">
+    <html lang={'en'} className={wantedSans.variable} suppressHydrationWarning>
+      <body className={'flex flex-col min-h-screen'}>
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: The request-independent bootstrap applies stored settings before first paint.
           dangerouslySetInnerHTML={{ __html: READER_SETTINGS_SCRIPT }}
@@ -53,4 +53,6 @@ export default function Layout({ children }: LayoutProps<'/'>) {
       </body>
     </html>
   );
-}
+};
+
+export default Layout;

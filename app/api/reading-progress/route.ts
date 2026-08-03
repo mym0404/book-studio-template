@@ -1,16 +1,15 @@
-import { isDevelopmentAuthBypass } from '@/lib/auth/env';
-import { hasTrustedOrigin, withPrivateNoStore } from '@/lib/auth/security';
-import { requireOwnerRequest } from '@/lib/auth/session';
-import {
-  getReadingProgressForBook,
-  getReadingProgressTarget,
-  isBookSlug,
-  saveReadingProgress,
-} from '@/lib/reading-progress';
+import { hasMutationAccess, withPrivateNoStore } from '@/feature/auth/security';
+import { requireOwnerRequest } from '@/feature/auth/session';
+import { isBookSlug } from '@/feature/library/books';
+import { getReadingProgressTarget } from '@/feature/reading/model/reading-progress';
 import {
   isTextQuoteSelector,
   type TextQuoteSelector,
-} from '@/lib/text-quote-selector';
+} from '@/feature/reading/model/text-quote-selector';
+import {
+  getReadingProgressForBook,
+  saveReadingProgress,
+} from '@/feature/reading/repositories/reading-progress';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +43,7 @@ export const POST = async (request: Request) => {
   const session = await requireOwnerRequest(request);
 
   if (session instanceof Response) return withPrivateNoStore(session);
-  if (!isDevelopmentAuthBypass() && !hasTrustedOrigin(request)) {
+  if (!hasMutationAccess(request)) {
     return withPrivateNoStore(new Response(null, { status: 401 }));
   }
 

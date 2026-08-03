@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { isDevelopmentAuthBypass } from '@/lib/auth/env';
-import { hasOwnerSession } from '@/lib/auth/session';
+import { isDevelopmentAuthBypass } from '@/feature/auth/env';
+import { hasOwnerSession } from '@/feature/auth/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,9 +11,9 @@ export const metadata: Metadata = {
   title: 'Sign in',
 };
 
-export default async function SignInLayout({
+const SignInLayout = async ({
   children,
-}: Readonly<{ children: ReactNode }>) {
+}: Readonly<{ children: ReactNode }>) => {
   if (isDevelopmentAuthBypass()) {
     redirect('/docs');
   }
@@ -23,4 +23,6 @@ export default async function SignInLayout({
   if (hasSession) redirect('/docs');
 
   return children;
-}
+};
+
+export default SignInLayout;

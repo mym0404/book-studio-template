@@ -1,18 +1,20 @@
-import { isAnnotationComment, isAnnotationStartOffset } from '@/lib/annotation';
+import {
+  isAnnotationComment,
+  isAnnotationStartOffset,
+} from '@/feature/annotations/model/annotation';
+import { getAnnotationPageUrl } from '@/feature/annotations/model/annotation-page';
 import {
   deleteAnnotation,
-  getAnnotationPageUrl,
   getAnnotations,
   saveAnnotation,
   updateAnnotationComment,
-} from '@/lib/annotations';
-import { isDevelopmentAuthBypass } from '@/lib/auth/env';
-import { hasTrustedOrigin, withPrivateNoStore } from '@/lib/auth/security';
-import { requireOwnerRequest } from '@/lib/auth/session';
+} from '@/feature/annotations/repositories/annotations';
+import { hasMutationAccess, withPrivateNoStore } from '@/feature/auth/security';
+import { requireOwnerRequest } from '@/feature/auth/session';
 import {
   isAnnotationTextQuoteSelector,
   type TextQuoteSelector,
-} from '@/lib/text-quote-selector';
+} from '@/feature/reading/model/text-quote-selector';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,9 +62,6 @@ const isDeleteAnnotationBody = (value: unknown): value is { id: string } =>
   value !== null &&
   'id' in value &&
   isAnnotationId(value.id);
-
-const hasMutationAccess = (request: Request) =>
-  isDevelopmentAuthBypass() || hasTrustedOrigin(request);
 
 export const GET = async (request: Request) => {
   const session = await requireOwnerRequest(request);

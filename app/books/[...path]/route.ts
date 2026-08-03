@@ -1,9 +1,9 @@
 import {
   PRIVATE_NO_STORE_HEADERS,
   withPrivateNoStore,
-} from '@/lib/auth/security';
-import { requireOwnerRequest } from '@/lib/auth/session';
-import { getBookAssetResponse } from '@/lib/book-assets';
+} from '@/feature/auth/security';
+import { requireOwnerRequest } from '@/feature/auth/session';
+import { getBookAssetResponse } from '@/feature/library/assets';
 
 export const dynamic = 'force-dynamic';
 

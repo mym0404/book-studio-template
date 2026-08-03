@@ -8,20 +8,26 @@ import {
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getMDXComponents } from '@/components/mdx';
-import { ReadingProgress } from '@/components/reading-progress';
-import { SharePageButton } from '@/components/share-page-button';
-import { requireOwnerPage } from '@/lib/auth/session';
-import { getPublicPageUrl, getShareablePage } from '@/lib/public-page';
-import { isPagePublic } from '@/lib/public-pages';
+import { PageAnnotations } from '@/feature/annotations/ui/page-annotations';
+import { requireOwnerPage } from '@/feature/auth/session';
+import { appName } from '@/feature/common/app';
+import { getBookSlugForPathname } from '@/feature/library/books';
 import {
-  getBookSlugForPathname,
-  getReadingProgressTarget,
-} from '@/lib/reading-progress';
-import { appName } from '@/lib/shared';
-import { getPageImage, getPageMarkdownUrl, source } from '@/lib/source';
+  getPageImage,
+  getPageMarkdownUrl,
+  source,
+} from '@/feature/library/source';
+import { getMDXComponents } from '@/feature/library/ui/mdx';
+import { getReadingProgressTarget } from '@/feature/reading/model/reading-progress';
+import { ReadingProgress } from '@/feature/reading/ui/reading-progress';
+import {
+  getPublicPageUrl,
+  getShareablePage,
+} from '@/feature/sharing/public-page';
+import { isPagePublic } from '@/feature/sharing/repositories/public-pages';
+import { SharePageButton } from '@/feature/sharing/ui/share-page-button';
 
-export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+const Page = async (props: PageProps<'/docs/[[...slug]]'>) => {
   await requireOwnerPage();
 
   const params = await props.params;
@@ -45,10 +51,10 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription className="mb-0">
+      <DocsDescription className={'mb-0'}>
         {page.data.description}
       </DocsDescription>
-      <div className="flex flex-row gap-2 items-center border-b pb-6">
+      <div className={'flex flex-row gap-2 items-center border-b pb-6'}>
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         {publicUrl && (
           <SharePageButton
@@ -61,7 +67,6 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       <DocsBody data-reading-content>
         <MDX
           components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
             a: createRelativeLink(source, page),
           })}
         />
@@ -70,14 +75,16 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         bookSlug={bookSlug}
         isBookChapter={Boolean(readingProgressTarget)}
         pathname={page.url}
-      />
+      >
+        <PageAnnotations pathname={page.url} />
+      </ReadingProgress>
     </DocsPage>
   );
-}
+};
 
-export async function generateMetadata(
+export const generateMetadata = async (
   props: PageProps<'/docs/[[...slug]]'>,
-): Promise<Metadata> {
+): Promise<Metadata> => {
   await requireOwnerPage();
 
   const params = await props.params;
@@ -104,4 +111,6 @@ export async function generateMetadata(
       images: imageUrl,
     },
   };
-}
+};
+
+export default Page;

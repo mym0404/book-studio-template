@@ -1,15 +1,15 @@
 import { notFound } from 'next/navigation';
-import { withPrivateNoStore } from '@/lib/auth/security';
-import { requireOwnerRequest } from '@/lib/auth/session';
-import { createBrandOgImage } from '@/lib/og-image';
-import { source } from '@/lib/source';
+import { withPrivateNoStore } from '@/feature/auth/security';
+import { requireOwnerRequest } from '@/feature/auth/session';
+import { createBrandOgImage } from '@/feature/common/ui/brand-og-image';
+import { source } from '@/feature/library/source';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
+export const GET = async (
   request: Request,
   { params }: RouteContext<'/og/docs/[...slug]'>,
-) {
+) => {
   const session = await requireOwnerRequest(request);
 
   if (session instanceof Response) return withPrivateNoStore(session);
@@ -24,4 +24,4 @@ export async function GET(
       description: page.data.description,
     }),
   );
-}
+};

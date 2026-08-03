@@ -64,12 +64,5 @@ export const isValidOwnerSetupToken = ({
   return timingSafeEqual(candidateHash, configuredHash);
 };
 
-export const isAuthBypass = ({
-  authMode = process.env.AUTH_MODE,
-  nodeEnv = process.env.NODE_ENV,
-}: {
-  authMode?: string;
-  nodeEnv?: string;
-} = {}) =>
-  authModeSchema.parse(authMode ?? 'passkey') === 'bypass' &&
-  nodeEnv !== 'production';
+export const isAuthBypass = (authMode = process.env.AUTH_MODE) =>
+  authModeSchema.parse(authMode ?? 'passkey') === 'bypass';

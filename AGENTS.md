@@ -38,7 +38,7 @@
 
 ## Access control
 
-- `pnpm dev` sets `AUTH_MODE=bypass`. Unset `AUTH_MODE`, E2E, and production use passkey authentication, and production never bypasses authentication.
+- `pnpm dev` sets `AUTH_MODE=bypass`. Unset `AUTH_MODE` and `AUTH_MODE=passkey` require passkey authentication. `AUTH_MODE=bypass` always bypasses authentication, so never configure it in production.
 - When no owner exists, `/sign-in` requires `OWNER_SETUP_TOKEN` before registering the passkey. There is no password, logout endpoint, or recovery UI.
 - `proxy.ts` only performs a coarse cookie-presence redirect. Protected pages and route handlers must enforce authorization with `requireOwnerPage()` or `requireOwnerRequest()`.
 - Private route responses must use `PRIVATE_NO_STORE_HEADERS` or `withPrivateNoStore()`.

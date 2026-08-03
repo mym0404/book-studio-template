@@ -45,19 +45,8 @@ describe('authentication security helpers', () => {
   });
 
   it('bypasses passkey authentication only when explicitly enabled', () => {
-    assert.equal(
-      isAuthBypass({ authMode: 'bypass', nodeEnv: 'development' }),
-      true,
-    );
-    assert.equal(
-      isAuthBypass({ authMode: 'passkey', nodeEnv: 'development' }),
-      false,
-    );
-    assert.equal(isAuthBypass({ nodeEnv: 'development' }), false);
-    assert.equal(
-      isAuthBypass({ authMode: 'bypass', nodeEnv: 'production' }),
-      false,
-    );
+    assert.equal(isAuthBypass('bypass'), true);
+    assert.equal(isAuthBypass('passkey'), false);
   });
 
   it('keeps authentication state out of unrelated cookies', () => {

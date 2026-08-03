@@ -37,6 +37,14 @@ docker exec -i book-studio-db \
   < db/migrations/001_initial.sql
 ```
 
+Create the fixed E2E database once. The E2E command applies the migration and
+resets only the authentication tables before its scenario:
+
+```sh
+docker exec book-studio-db \
+  createdb -U book_studio book_studio_e2e
+```
+
 Create `.env.local` with the local connection string, then restart the development server:
 
 ```dotenv

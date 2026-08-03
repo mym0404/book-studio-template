@@ -61,6 +61,7 @@
 ## Verification
 
 - `mise exec -- pnpm test` runs `tests/**/*.test.ts` through `tsx` and Node's test runner.
+- `mise exec -- pnpm test:e2e` runs the single local passkey flow against `http://localhost:3100` and the `book_studio_e2e` database.
 - `mise exec -- pnpm lint` checks formatting, lint rules, and import ordering with Biome.
 - `mise exec -- pnpm format` rewrites Biome-supported files and applies safe fixes. Use it only when edits are authorized.
 - `mise exec -- pnpm types:check` generates Fumadocs and Next.js route types, then runs `tsc --noEmit`.

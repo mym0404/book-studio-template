@@ -159,7 +159,7 @@ mise exec -- pnpm types:check
 mise exec -- pnpm build
 ```
 
-Then start `mise exec -- pnpm dev`, verify that `http://localhost:3000/docs` renders, exercise one database-backed read, and stop the server. Development mode bypasses authentication and redirects `/sign-in`, so local success does not verify passkeys or production authorization.
+Then start `mise exec -- pnpm dev`, verify that `http://localhost:3000/docs` renders, exercise one database-backed read, and stop the server. This command sets `AUTH_MODE=bypass` and redirects `/sign-in`, so this smoke test does not verify passkeys or production authorization. The separate `mise exec -- pnpm test:e2e` command uses `AUTH_MODE=passkey` and a virtual passkey at `http://localhost:3100`.
 
 Fix only failures caused by installation. Report pre-existing failures separately and do not change application logic without the user's approval.
 

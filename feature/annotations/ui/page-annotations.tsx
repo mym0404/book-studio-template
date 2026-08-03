@@ -24,7 +24,7 @@ import {
   useState,
 } from 'react';
 import {
-  isAnnotationComment,
+  annotationCommentSchema,
   MAX_ANNOTATION_COMMENT_LENGTH,
 } from '@/feature/annotations/model/annotation';
 import {
@@ -152,6 +152,7 @@ export const PageAnnotations = ({ pathname }: { pathname: string }) => {
   const selectedAnnotation = activeAnnotation
     ? annotations.find(({ id }) => id === activeAnnotation.id)
     : undefined;
+  const commentDraftResult = annotationCommentSchema.safeParse(commentDraft);
   const floatingSelectionMenu =
     selectionMenu?.inputMode === 'desktop' ? selectionMenu : undefined;
   const floatingCommentEditor =
@@ -300,10 +301,7 @@ export const PageAnnotations = ({ pathname }: { pathname: string }) => {
   };
 
   const saveComment = ({ comment, id }: { comment: string; id: string }) => {
-    if (
-      !isAnnotationComment(comment) ||
-      !annotations.some((annotation) => annotation.id === id)
-    ) {
+    if (!annotations.some((annotation) => annotation.id === id)) {
       return;
     }
 
@@ -361,18 +359,23 @@ export const PageAnnotations = ({ pathname }: { pathname: string }) => {
             'bg-fd-primary text-fd-primary-foreground',
             commentEditorIsTouch ? 'min-h-11' : 'py-2',
           )}
-          disabled={!isAnnotationComment(commentDraft) || isSaving}
+          disabled={!commentDraftResult.success || isSaving}
           onClick={() => {
+            if (!commentDraftResult.success) return;
+
             if ('selector' in commentEditor) {
               createAnnotation({
-                comment: commentDraft.trim(),
+                comment: commentDraftResult.data,
                 selector: commentEditor.selector,
                 startOffset: commentEditor.startOffset,
               });
               return;
             }
 
-            saveComment({ comment: commentDraft, id: commentEditor.id });
+            saveComment({
+              comment: commentDraftResult.data,
+              id: commentEditor.id,
+            });
           }}
           type={'button'}
         >

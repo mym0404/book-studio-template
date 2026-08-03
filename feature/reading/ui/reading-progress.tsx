@@ -4,28 +4,12 @@ import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import {
-  isTextQuoteSelector,
-  type TextQuoteSelector,
-} from '@/feature/reading/model/text-quote-selector';
+  type ReadingProgressResponse,
+  readingProgressResponseSchema,
+} from '@/feature/reading/model/reading-progress';
 import { ReadingProgressTracker } from '@/feature/reading/ui/reading-progress-tracker';
 
-type SavedProgress = {
-  pageTitle: string;
-  pageUrl: string;
-  selector: TextQuoteSelector;
-};
-
 const ACTIVE_BOOK_KEY = 'reading-progress-active-book';
-
-const isSavedProgress = (value: unknown): value is SavedProgress =>
-  typeof value === 'object' &&
-  value !== null &&
-  'pageUrl' in value &&
-  typeof value.pageUrl === 'string' &&
-  'pageTitle' in value &&
-  typeof value.pageTitle === 'string' &&
-  'selector' in value &&
-  isTextQuoteSelector(value.selector);
 
 /**
  * Requires a book context and withholds its tracker and children until the
@@ -43,7 +27,8 @@ export const ReadingProgress = ({
   pathname: string;
 }) => {
   const router = useRouter();
-  const [progress, setProgress] = useState<SavedProgress>();
+  const [progress, setProgress] =
+    useState<ReadingProgressResponse['progress']>();
   const [resolvedPathname, setResolvedPathname] = useState<string>();
   const isEntryResolved = resolvedPathname === pathname;
 
@@ -75,15 +60,12 @@ export const ReadingProgress = ({
 
         if (!response.ok || controller.signal.aborted) return;
 
-        const value: unknown = await response.json();
+        const result = readingProgressResponseSchema.safeParse(
+          await response.json(),
+        );
 
-        if (
-          typeof value === 'object' &&
-          value !== null &&
-          'progress' in value &&
-          isSavedProgress(value.progress)
-        ) {
-          setProgress(value.progress);
+        if (result.success && result.data.progress) {
+          setProgress(result.data.progress);
           return;
         }
       } catch {

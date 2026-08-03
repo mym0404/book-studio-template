@@ -1,13 +1,16 @@
-import { neon } from '@neondatabase/serverless';
+import { z } from 'zod';
 import { docsRoute } from '@/feature/common/app';
-import { getDatabaseUrl } from '@/feature/common/database';
+import { getDatabase } from '@/feature/common/database';
+
+const publishedPageRowSchema = z.object({ page_url: z.string() });
+const publicPageAssetRowSchema = z.object({ asset_secret: z.string() });
 
 export const getPublishedPageUrlsForBook = async ({
   bookSlug,
 }: {
   bookSlug: string;
 }) => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
   const bookUrl = `${docsRoute}/${bookSlug}`;
   const rows = await sql`
     SELECT page_url
@@ -16,9 +19,11 @@ export const getPublishedPageUrlsForBook = async ({
       OR page_url LIKE ${`${bookUrl}/%`}
   `;
 
-  return rows.flatMap((row) =>
-    typeof row.page_url === 'string' ? [row.page_url] : [],
-  );
+  return rows.flatMap((row) => {
+    const result = publishedPageRowSchema.safeParse(row);
+
+    return result.success ? [result.data.page_url] : [];
+  });
 };
 
 export const isPagePublic = async ({ pageUrl }: { pageUrl: string }) => {
@@ -34,27 +39,20 @@ export const getPublicPageAssetSecret = async ({
 }: {
   pageUrl: string;
 }) => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
   const [row] = await sql`
     SELECT asset_secret
     FROM public_pages
     WHERE page_url = ${pageUrl}
   `;
 
-  if (
-    typeof row !== 'object' ||
-    row === null ||
-    !('asset_secret' in row) ||
-    typeof row.asset_secret !== 'string'
-  ) {
-    return undefined;
-  }
+  const result = publicPageAssetRowSchema.safeParse(row);
 
-  return row.asset_secret;
+  return result.success ? result.data.asset_secret : undefined;
 };
 
 export const publishPage = async ({ pageUrl }: { pageUrl: string }) => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
 
   await sql`
     INSERT INTO public_pages (page_url)
@@ -64,7 +62,7 @@ export const publishPage = async ({ pageUrl }: { pageUrl: string }) => {
 };
 
 export const unpublishPage = async ({ pageUrl }: { pageUrl: string }) => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
 
   await sql`
     DELETE FROM public_pages

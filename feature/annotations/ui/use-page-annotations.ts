@@ -3,25 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   type Annotation,
-  isAnnotation,
+  annotationListResponseSchema,
+  annotationResponseSchema,
 } from '@/feature/annotations/model/annotation';
 import type { TextQuoteSelector } from '@/feature/reading/model/text-quote-selector';
-
-const isAnnotationList = (value: unknown): value is Annotation[] =>
-  Array.isArray(value) && value.every(isAnnotation);
-
-const getAnnotationResponse = (value: unknown) => {
-  if (
-    typeof value === 'object' &&
-    value !== null &&
-    'annotation' in value &&
-    isAnnotation(value.annotation)
-  ) {
-    return value.annotation;
-  }
-
-  return undefined;
-};
 
 /**
  * Aborts the initial load before mutations, applies optimistic state, then
@@ -87,14 +72,14 @@ export const usePageAnnotations = ({ pathname }: { pathname: string }) => {
         method: 'POST',
       });
       const value: unknown = response.ok ? await response.json() : undefined;
-      const annotation = getAnnotationResponse(value);
+      const result = annotationResponseSchema.safeParse(value);
 
-      if (!annotation) throw new Error('Could not save annotation.');
+      if (!result.success) throw new Error('Could not save annotation.');
 
       setAnnotations((current) =>
         current.filter((item) => item.id !== optimisticAnnotation.id),
       );
-      upsertAnnotation(annotation);
+      upsertAnnotation(result.data.annotation);
     } catch {
       setAnnotations((current) =>
         current.filter((item) => item.id !== optimisticAnnotation.id),
@@ -132,11 +117,11 @@ export const usePageAnnotations = ({ pathname }: { pathname: string }) => {
         method: 'PATCH',
       });
       const value: unknown = response.ok ? await response.json() : undefined;
-      const updatedAnnotation = getAnnotationResponse(value);
+      const result = annotationResponseSchema.safeParse(value);
 
-      if (!updatedAnnotation) throw new Error('Could not update comment.');
+      if (!result.success) throw new Error('Could not update comment.');
 
-      upsertAnnotation(updatedAnnotation);
+      upsertAnnotation(result.data.annotation);
     } catch {
       upsertAnnotation(annotation);
       setError('Could not update comment.');
@@ -184,15 +169,9 @@ export const usePageAnnotations = ({ pathname }: { pathname: string }) => {
         if (!response.ok || controller.signal.aborted) return;
 
         const value: unknown = await response.json();
+        const result = annotationListResponseSchema.safeParse(value);
 
-        if (
-          typeof value === 'object' &&
-          value !== null &&
-          'annotations' in value &&
-          isAnnotationList(value.annotations)
-        ) {
-          setAnnotations(value.annotations);
-        }
+        if (result.success) setAnnotations(result.data.annotations);
       } catch {
         // Reading remains available when annotations cannot be loaded.
       }

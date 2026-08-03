@@ -1,51 +1,16 @@
 'use client';
 
 import {
-  type PublicKeyCredentialCreationOptionsJSON,
-  type PublicKeyCredentialRequestOptionsJSON,
   startAuthentication,
   startRegistration,
 } from '@simplewebauthn/browser';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-
-type PasskeyMode = 'authentication' | 'setup';
-
-type AuthenticationOptionsResponse = {
-  mode: 'authentication';
-  options: PublicKeyCredentialRequestOptionsJSON;
-};
-
-type RegistrationOptionsResponse = {
-  mode: 'setup';
-  options: PublicKeyCredentialCreationOptionsJSON;
-};
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
-const isModeResponse = (value: unknown): value is { mode: PasskeyMode } =>
-  isRecord(value) &&
-  (value.mode === 'authentication' || value.mode === 'setup');
-
-const isAuthenticationOptionsResponse = (
-  value: unknown,
-): value is AuthenticationOptionsResponse =>
-  isRecord(value) &&
-  value.mode === 'authentication' &&
-  isRecord(value.options) &&
-  typeof value.options.challenge === 'string';
-
-const isRegistrationOptionsResponse = (
-  value: unknown,
-): value is RegistrationOptionsResponse =>
-  isRecord(value) &&
-  value.mode === 'setup' &&
-  isRecord(value.options) &&
-  typeof value.options.challenge === 'string' &&
-  isRecord(value.options.rp) &&
-  isRecord(value.options.user) &&
-  Array.isArray(value.options.pubKeyCredParams);
+import {
+  type PasskeyMode,
+  passkeyModeResponseSchema,
+  passkeyOptionsResponseSchema,
+} from '@/feature/auth/passkey-schema';
 
 const readJson = async (response: Response): Promise<unknown> =>
   response.json().catch(() => undefined);
@@ -85,8 +50,9 @@ export const SignInPage = () => {
           credentials: 'same-origin',
         });
         const value = await readJson(response);
+        const result = passkeyModeResponseSchema.safeParse(value);
 
-        if (!response.ok || !isModeResponse(value)) {
+        if (!response.ok || !result.success) {
           throw new Error(
             response.status === 503
               ? 'The sign-in service is temporarily unavailable.'
@@ -94,7 +60,7 @@ export const SignInPage = () => {
           );
         }
 
-        if (active) setMode(value.mode);
+        if (active) setMode(result.data.mode);
       } catch (caughtError) {
         if (!active) return;
 
@@ -135,11 +101,12 @@ export const SignInPage = () => {
         throw new Error(getRequestError({ mode, response: optionsResponse }));
       }
 
-      const credential = isAuthenticationOptionsResponse(value)
-        ? await startAuthentication({ optionsJSON: value.options })
-        : isRegistrationOptionsResponse(value)
-          ? await startRegistration({ optionsJSON: value.options })
-          : undefined;
+      const result = passkeyOptionsResponseSchema.safeParse(value);
+      const credential = result.success
+        ? result.data.mode === 'authentication'
+          ? await startAuthentication({ optionsJSON: result.data.options })
+          : await startRegistration({ optionsJSON: result.data.options })
+        : undefined;
 
       if (!credential) throw new Error('Passkey sign-in is unavailable.');
 

@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { docsRoute, publicPageRoute } from '@/feature/common/app';
 import { getBookSlugForPathname } from '@/feature/library/books';
 import { source } from '@/feature/library/source';
@@ -6,6 +7,8 @@ export const PUBLIC_NO_STORE_HEADERS = {
   'Cache-Control': 'no-store',
   Pragma: 'no-cache',
 };
+
+export const publicPageMutationSchema = z.object({ pageUrl: z.string() });
 
 /**
  * Resolves only canonical book landing and chapter URLs; deeper or mismatched

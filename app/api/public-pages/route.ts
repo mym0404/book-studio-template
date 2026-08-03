@@ -1,6 +1,9 @@
 import { hasMutationAccess, withPrivateNoStore } from '@/feature/auth/security';
 import { requireOwnerRequest } from '@/feature/auth/session';
-import { getShareablePage } from '@/feature/sharing/public-page';
+import {
+  getShareablePage,
+  publicPageMutationSchema,
+} from '@/feature/sharing/public-page';
 import {
   publishPage,
   unpublishPage,
@@ -15,18 +18,13 @@ const unauthorized = () =>
   withPrivateNoStore(new Response(null, { status: 401 }));
 
 const getPageUrl = async (request: Request) => {
-  const body: unknown = await request.json().catch(() => undefined);
+  const result = publicPageMutationSchema.safeParse(
+    await request.json().catch(() => undefined),
+  );
 
-  if (
-    typeof body !== 'object' ||
-    body === null ||
-    !('pageUrl' in body) ||
-    typeof body.pageUrl !== 'string'
-  ) {
-    return undefined;
-  }
-
-  return getShareablePage({ pageUrl: body.pageUrl })?.page.url;
+  return result.success
+    ? getShareablePage({ pageUrl: result.data.pageUrl })?.page.url
+    : undefined;
 };
 
 export const PUT = async (request: Request) => {

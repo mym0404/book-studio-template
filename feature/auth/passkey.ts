@@ -1,8 +1,6 @@
 import {
-  type AuthenticationResponseJSON,
   generateAuthenticationOptions,
   generateRegistrationOptions,
-  type RegistrationResponseJSON,
   verifyAuthenticationResponse,
   verifyRegistrationResponse,
 } from '@simplewebauthn/server';
@@ -12,7 +10,12 @@ import {
 } from '@/feature/auth/constants';
 import { getAuthEnv, isValidOwnerSetupToken } from '@/feature/auth/env';
 import {
+  authenticationResponseSchema,
   type ChallengePurpose,
+  type PasskeyMode,
+  registrationResponseSchema,
+} from '@/feature/auth/passkey-schema';
+import {
   consumeChallenge,
   getOwnerCredential,
   registerOwnerAndCreateSession,
@@ -22,50 +25,12 @@ import {
 import {
   createOpaqueToken,
   hashOpaqueToken,
-  isOpaqueToken,
+  opaqueTokenSchema,
 } from '@/feature/auth/tokens';
-
-type PasskeyMode = 'authentication' | 'setup';
 
 type PasskeyVerificationResult =
   | { status: 'conflict' | 'unauthorized' }
   | { sessionToken: string; status: 'verified' };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
-export const isAuthenticationResponse = (
-  value: unknown,
-): value is AuthenticationResponseJSON => {
-  if (!isRecord(value) || !isRecord(value.response)) return false;
-
-  return (
-    typeof value.id === 'string' &&
-    typeof value.rawId === 'string' &&
-    value.type === 'public-key' &&
-    isRecord(value.clientExtensionResults) &&
-    typeof value.response.clientDataJSON === 'string' &&
-    typeof value.response.authenticatorData === 'string' &&
-    typeof value.response.signature === 'string' &&
-    (value.response.userHandle === undefined ||
-      typeof value.response.userHandle === 'string')
-  );
-};
-
-export const isRegistrationResponse = (
-  value: unknown,
-): value is RegistrationResponseJSON => {
-  if (!isRecord(value) || !isRecord(value.response)) return false;
-
-  return (
-    typeof value.id === 'string' &&
-    typeof value.rawId === 'string' &&
-    value.type === 'public-key' &&
-    isRecord(value.clientExtensionResults) &&
-    typeof value.response.clientDataJSON === 'string' &&
-    typeof value.response.attestationObject === 'string'
-  );
-};
 
 export const createAuthenticationOptions = async ({
   credentialId,
@@ -175,7 +140,8 @@ const verifyRegistration = async ({
   challenge: string;
   response: unknown;
 }): Promise<PasskeyVerificationResult> => {
-  if (!isRegistrationResponse(response)) return { status: 'unauthorized' };
+  const responseResult = registrationResponseSchema.safeParse(response);
+  if (!responseResult.success) return { status: 'unauthorized' };
 
   const { origin, rpId } = getAuthEnv();
   let verification: Awaited<ReturnType<typeof verifyRegistrationResponse>>;
@@ -186,7 +152,7 @@ const verifyRegistration = async ({
       expectedOrigin: origin,
       expectedRPID: rpId,
       requireUserVerification: true,
-      response,
+      response: responseResult.data,
     });
   } catch {
     return { status: 'unauthorized' };
@@ -218,11 +184,12 @@ const verifyAuthentication = async ({
   challenge: string;
   response: unknown;
 }): Promise<PasskeyVerificationResult> => {
-  if (!isAuthenticationResponse(response)) return { status: 'unauthorized' };
+  const responseResult = authenticationResponseSchema.safeParse(response);
+  if (!responseResult.success) return { status: 'unauthorized' };
 
   const credential = await getOwnerCredential();
   if (!credential) return { status: 'conflict' };
-  if (response.id !== credential.credentialId) {
+  if (responseResult.data.id !== credential.credentialId) {
     return { status: 'unauthorized' };
   }
 
@@ -242,7 +209,7 @@ const verifyAuthentication = async ({
       expectedOrigin: origin,
       expectedRPID: rpId,
       requireUserVerification: true,
-      response,
+      response: responseResult.data,
     });
   } catch {
     return { status: 'unauthorized' };
@@ -278,7 +245,9 @@ export const verifyOwnerPasskey = async ({
   challengeToken: string;
   response: unknown;
 }): Promise<PasskeyVerificationResult> => {
-  if (!isOpaqueToken(challengeToken)) return { status: 'unauthorized' };
+  if (!opaqueTokenSchema.safeParse(challengeToken).success) {
+    return { status: 'unauthorized' };
+  }
 
   const challenge = await consumeChallenge({
     tokenHash: hashOpaqueToken(challengeToken),

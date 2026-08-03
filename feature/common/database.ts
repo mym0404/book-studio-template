@@ -1,10 +1,17 @@
-/** Keeps DATABASE_URL as the single connection source for every feature repository. */
-export const getDatabaseUrl = () => {
-  const databaseUrl = process.env.DATABASE_URL?.trim();
+import postgres from 'postgres';
+import { z } from 'zod';
 
-  if (!databaseUrl) {
-    throw new Error('Missing required environment variable: DATABASE_URL');
-  }
+const databaseUrlSchema = z.string().trim().min(1);
 
-  return databaseUrl;
+let database: ReturnType<typeof postgres> | undefined;
+
+/** Lazily reuses one PostgreSQL client so builds do not require a live database. */
+export const getDatabase = () => {
+  database ??= postgres(databaseUrlSchema.parse(process.env.DATABASE_URL), {
+    idle_timeout: 20,
+    max: 1,
+    prepare: false,
+  });
+
+  return database;
 };

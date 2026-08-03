@@ -10,6 +10,7 @@ import {
   READER_FONT_OPTIONS,
   READER_LINE_HEIGHT_OPTIONS,
   READER_SIZE_OPTIONS,
+  type ReaderSettings,
 } from '@/feature/reading/model/reader-settings';
 import { MobileReaderPopoverContext } from '@/feature/reading/ui/auto-hide-docs-header';
 import styles from '@/feature/reading/ui/reader-settings.module.css';
@@ -36,17 +37,15 @@ export const ReaderSettingsControl = () => {
     return () => setMobilePopoverOpen?.(false);
   }, [open, setMobilePopoverOpen]);
 
-  const updateFont = (font: (typeof READER_FONT_OPTIONS)[number]['value']) => {
+  const updateFont = (font: ReaderSettings['font']) => {
     updateSettings({ ...settings, font });
   };
 
-  const updateSize = (size: (typeof READER_SIZE_OPTIONS)[number]) => {
+  const updateSize = (size: ReaderSettings['size']) => {
     updateSettings({ ...settings, size });
   };
 
-  const updateLineHeight = (
-    lineHeight: (typeof READER_LINE_HEIGHT_OPTIONS)[number]['value'],
-  ) => {
+  const updateLineHeight = (lineHeight: ReaderSettings['lineHeight']) => {
     updateSettings({ ...settings, lineHeight });
   };
 
@@ -88,7 +87,7 @@ export const ReaderSettingsControl = () => {
                 >
                   Font
                 </div>
-                <RadioGroup<(typeof READER_FONT_OPTIONS)[number]['value']>
+                <RadioGroup<ReaderSettings['font']>
                   aria-labelledby={fontLabelId}
                   className={'grid gap-2'}
                   onValueChange={updateFont}
@@ -127,24 +126,24 @@ export const ReaderSettingsControl = () => {
                 >
                   Text size (px)
                 </div>
-                <RadioGroup<(typeof READER_SIZE_OPTIONS)[number]>
+                <RadioGroup<ReaderSettings['size']>
                   aria-labelledby={sizeLabelId}
                   className={'grid grid-cols-5 gap-1.5'}
                   onValueChange={updateSize}
                   value={settings.size}
                 >
-                  {READER_SIZE_OPTIONS.map((size) => (
+                  {READER_SIZE_OPTIONS.map((option) => (
                     <Radio.Root
-                      aria-label={`${size} pixels`}
+                      aria-label={`${option.value} pixels`}
                       className={
                         'flex cursor-pointer justify-center rounded-md border px-1 py-2 text-sm tabular-nums transition-colors hover:bg-fd-accent/50 data-checked:border-fd-primary data-checked:bg-fd-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring'
                       }
-                      key={size}
+                      key={option.value}
                       nativeButton
                       render={<button type={'button'} />}
-                      value={size}
+                      value={option.value}
                     >
-                      {size}
+                      {option.label}
                     </Radio.Root>
                   ))}
                 </RadioGroup>
@@ -159,9 +158,7 @@ export const ReaderSettingsControl = () => {
                 >
                   Line height
                 </div>
-                <RadioGroup<
-                  (typeof READER_LINE_HEIGHT_OPTIONS)[number]['value']
-                >
+                <RadioGroup<ReaderSettings['lineHeight']>
                   aria-labelledby={lineHeightLabelId}
                   className={'grid grid-cols-3 gap-1.5'}
                   onValueChange={updateLineHeight}

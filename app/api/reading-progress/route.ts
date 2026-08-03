@@ -1,11 +1,10 @@
 import { hasMutationAccess, withPrivateNoStore } from '@/feature/auth/security';
 import { requireOwnerRequest } from '@/feature/auth/session';
 import { isBookSlug } from '@/feature/library/books';
-import { getReadingProgressTarget } from '@/feature/reading/model/reading-progress';
 import {
-  isTextQuoteSelector,
-  type TextQuoteSelector,
-} from '@/feature/reading/model/text-quote-selector';
+  getReadingProgressTarget,
+  readingProgressRequestSchema,
+} from '@/feature/reading/model/reading-progress';
 import {
   getReadingProgressForBook,
   saveReadingProgress,
@@ -15,15 +14,6 @@ export const dynamic = 'force-dynamic';
 
 const badRequest = () =>
   withPrivateNoStore(new Response(null, { status: 400 }));
-
-const isReadingProgressBody = (
-  value: unknown,
-): value is { pathname: string; selector?: TextQuoteSelector } =>
-  typeof value === 'object' &&
-  value !== null &&
-  'pathname' in value &&
-  typeof value.pathname === 'string' &&
-  (!('selector' in value) || isTextQuoteSelector(value.selector));
 
 export const GET = async (request: Request) => {
   const session = await requireOwnerRequest(request);
@@ -47,14 +37,13 @@ export const POST = async (request: Request) => {
     return withPrivateNoStore(new Response(null, { status: 401 }));
   }
 
-  const body: unknown = await request.json().catch(() => undefined);
+  const bodyResult = readingProgressRequestSchema.safeParse(
+    await request.json().catch(() => undefined),
+  );
 
-  if (!isReadingProgressBody(body)) return badRequest();
+  if (!bodyResult.success) return badRequest();
 
-  const target = getReadingProgressTarget({
-    pathname: body.pathname,
-    selector: body.selector,
-  });
+  const target = getReadingProgressTarget(bodyResult.data);
 
   if (!target) return badRequest();
 

@@ -1,6 +1,7 @@
 import {
-  isAnnotationComment,
-  isAnnotationStartOffset,
+  createAnnotationRequestSchema,
+  deleteAnnotationRequestSchema,
+  updateAnnotationRequestSchema,
 } from '@/feature/annotations/model/annotation';
 import { getAnnotationPageUrl } from '@/feature/annotations/model/annotation-page';
 import {
@@ -11,10 +12,6 @@ import {
 } from '@/feature/annotations/repositories/annotations';
 import { hasMutationAccess, withPrivateNoStore } from '@/feature/auth/security';
 import { requireOwnerRequest } from '@/feature/auth/session';
-import {
-  isAnnotationTextQuoteSelector,
-  type TextQuoteSelector,
-} from '@/feature/reading/model/text-quote-selector';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,46 +19,6 @@ const badRequest = () =>
   withPrivateNoStore(new Response(null, { status: 400 }));
 
 const notFound = () => withPrivateNoStore(new Response(null, { status: 404 }));
-
-const isAnnotationId = (value: unknown) =>
-  typeof value === 'string' &&
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    value,
-  );
-
-const isCreateAnnotationBody = (
-  value: unknown,
-): value is {
-  comment?: string;
-  pageUrl: string;
-  selector: TextQuoteSelector;
-  startOffset: number;
-} =>
-  typeof value === 'object' &&
-  value !== null &&
-  'pageUrl' in value &&
-  typeof value.pageUrl === 'string' &&
-  'selector' in value &&
-  isAnnotationTextQuoteSelector(value.selector) &&
-  'startOffset' in value &&
-  isAnnotationStartOffset(value.startOffset) &&
-  (!('comment' in value) || isAnnotationComment(value.comment));
-
-const isUpdateAnnotationBody = (
-  value: unknown,
-): value is { comment: string; id: string } =>
-  typeof value === 'object' &&
-  value !== null &&
-  'id' in value &&
-  isAnnotationId(value.id) &&
-  'comment' in value &&
-  isAnnotationComment(value.comment);
-
-const isDeleteAnnotationBody = (value: unknown): value is { id: string } =>
-  typeof value === 'object' &&
-  value !== null &&
-  'id' in value &&
-  isAnnotationId(value.id);
 
 export const GET = async (request: Request) => {
   const session = await requireOwnerRequest(request);
@@ -87,19 +44,21 @@ export const POST = async (request: Request) => {
     return withPrivateNoStore(new Response(null, { status: 401 }));
   }
 
-  const body: unknown = await request.json().catch(() => undefined);
+  const body = createAnnotationRequestSchema.safeParse(
+    await request.json().catch(() => undefined),
+  );
 
-  if (!isCreateAnnotationBody(body)) return badRequest();
+  if (!body.success) return badRequest();
 
-  const pageUrl = getAnnotationPageUrl({ pathname: body.pageUrl });
+  const pageUrl = getAnnotationPageUrl({ pathname: body.data.pageUrl });
 
   if (!pageUrl) return badRequest();
 
   const annotation = await saveAnnotation({
-    comment: body.comment?.trim(),
+    comment: body.data.comment,
     pageUrl,
-    selector: body.selector,
-    startOffset: body.startOffset,
+    selector: body.data.selector,
+    startOffset: body.data.startOffset,
   });
 
   if (!annotation) return badRequest();
@@ -115,13 +74,15 @@ export const PATCH = async (request: Request) => {
     return withPrivateNoStore(new Response(null, { status: 401 }));
   }
 
-  const body: unknown = await request.json().catch(() => undefined);
+  const body = updateAnnotationRequestSchema.safeParse(
+    await request.json().catch(() => undefined),
+  );
 
-  if (!isUpdateAnnotationBody(body)) return badRequest();
+  if (!body.success) return badRequest();
 
   const annotation = await updateAnnotationComment({
-    comment: body.comment.trim(),
-    id: body.id,
+    comment: body.data.comment,
+    id: body.data.id,
   });
 
   if (!annotation) return notFound();
@@ -137,11 +98,13 @@ export const DELETE = async (request: Request) => {
     return withPrivateNoStore(new Response(null, { status: 401 }));
   }
 
-  const body: unknown = await request.json().catch(() => undefined);
+  const body = deleteAnnotationRequestSchema.safeParse(
+    await request.json().catch(() => undefined),
+  );
 
-  if (!isDeleteAnnotationBody(body)) return badRequest();
+  if (!body.success) return badRequest();
 
-  if (!(await deleteAnnotation({ id: body.id }))) return notFound();
+  if (!(await deleteAnnotation({ id: body.data.id }))) return notFound();
 
   return withPrivateNoStore(new Response(null, { status: 204 }));
 };

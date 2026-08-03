@@ -2,9 +2,9 @@
 
 import { useEffect } from 'react';
 import { READING_CONTENT_SELECTOR } from '@/feature/reading/model/reading-content';
+import { readingProgressResumeSchema } from '@/feature/reading/model/reading-progress';
 import {
   getTextQuoteSelector,
-  isTextQuoteSelector,
   restoreTextQuoteSelector,
 } from '@/feature/reading/model/text-quote-selector';
 
@@ -41,14 +41,11 @@ export const ReadingProgressTracker = ({ pathname }: { pathname: string }) => {
 
       if (stored) {
         try {
-          const value: unknown = JSON.parse(stored);
+          const result = readingProgressResumeSchema.safeParse(
+            JSON.parse(stored),
+          );
 
-          if (
-            typeof value === 'object' &&
-            value !== null &&
-            'selector' in value &&
-            isTextQuoteSelector(value.selector)
-          ) {
+          if (result.success) {
             await new Promise<void>((resolve) => {
               requestAnimationFrame(() => resolve());
             });
@@ -60,7 +57,10 @@ export const ReadingProgressTracker = ({ pathname }: { pathname: string }) => {
             );
 
             if (root) {
-              restoreTextQuoteSelector({ root, selector: value.selector });
+              restoreTextQuoteSelector({
+                root,
+                selector: result.data.selector,
+              });
             }
           }
         } catch {

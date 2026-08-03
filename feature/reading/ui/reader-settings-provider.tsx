@@ -157,10 +157,13 @@ export const ReaderSettingsProvider = ({
   const settingsRef = useRef<ReaderSettings>(DEFAULT_READER_SETTINGS);
 
   useEffect(() => {
-    const storedSettings = getReaderSettingsFromDocument();
+    const documentSettings = getReaderSettingsFromDocument();
+    const nextSettings = documentSettings ?? DEFAULT_READER_SETTINGS;
 
-    settingsRef.current = storedSettings;
-    setSettings(storedSettings);
+    if (!documentSettings) applyReaderSettingsToDocument(nextSettings);
+
+    settingsRef.current = nextSettings;
+    setSettings(nextSettings);
 
     return () => {
       if (restoreFrame.current !== undefined) {

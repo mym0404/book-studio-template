@@ -1,49 +1,32 @@
+import { z } from 'zod';
 import {
   READING_ANCHOR_TOP_PX,
   READING_BLOCK_SELECTOR,
 } from '@/feature/reading/model/reading-content';
 
-export type TextQuoteSelector = {
-  exact: string;
-  prefix: string;
-  suffix: string;
-};
+const CONTEXT_LENGTH = 48;
+const READING_EXACT_LENGTH = 160;
+export const ANNOTATION_EXACT_LENGTH = 300;
+
+const textQuoteContextSchema = z.object({
+  prefix: z.string().max(CONTEXT_LENGTH),
+  suffix: z.string().max(CONTEXT_LENGTH),
+});
+
+export const textQuoteSelectorSchema = textQuoteContextSchema.extend({
+  exact: z.string().min(1).max(READING_EXACT_LENGTH),
+});
+
+export const annotationTextQuoteSelectorSchema = textQuoteContextSchema.extend({
+  exact: z.string().min(1).max(ANNOTATION_EXACT_LENGTH),
+});
+
+export type TextQuoteSelector = z.infer<typeof textQuoteSelectorSchema>;
 
 export type TextQuoteSelection = {
   selector: TextQuoteSelector;
   startOffset: number;
 };
-
-const CONTEXT_LENGTH = 48;
-const READING_EXACT_LENGTH = 160;
-export const ANNOTATION_EXACT_LENGTH = 300;
-
-const isTextQuoteSelectorWithExactLength = (
-  value: unknown,
-  exactLength: number,
-): value is TextQuoteSelector =>
-  typeof value === 'object' &&
-  value !== null &&
-  'exact' in value &&
-  typeof value.exact === 'string' &&
-  value.exact.length > 0 &&
-  value.exact.length <= exactLength &&
-  'prefix' in value &&
-  typeof value.prefix === 'string' &&
-  value.prefix.length <= CONTEXT_LENGTH &&
-  'suffix' in value &&
-  typeof value.suffix === 'string' &&
-  value.suffix.length <= CONTEXT_LENGTH;
-
-export const isTextQuoteSelector = (
-  value: unknown,
-): value is TextQuoteSelector =>
-  isTextQuoteSelectorWithExactLength(value, READING_EXACT_LENGTH);
-
-export const isAnnotationTextQuoteSelector = (
-  value: unknown,
-): value is TextQuoteSelector =>
-  isTextQuoteSelectorWithExactLength(value, ANNOTATION_EXACT_LENGTH);
 
 const getVisibleReadingBlock = (root: HTMLElement) => {
   const blocks = Array.from(
@@ -165,22 +148,16 @@ export const getTextQuoteSelectorForRange = ({
   const end = endOffset - lastCharacter;
   const exact = text.slice(start, end);
 
-  if (
-    !isAnnotationTextQuoteSelector({
-      exact,
-      prefix: text.slice(Math.max(0, start - CONTEXT_LENGTH), start),
-      suffix: text.slice(end, end + CONTEXT_LENGTH),
-    })
-  ) {
-    return undefined;
-  }
+  const selector = annotationTextQuoteSelectorSchema.safeParse({
+    exact,
+    prefix: text.slice(Math.max(0, start - CONTEXT_LENGTH), start),
+    suffix: text.slice(end, end + CONTEXT_LENGTH),
+  });
+
+  if (!selector.success) return undefined;
 
   return {
-    selector: {
-      exact,
-      prefix: text.slice(Math.max(0, start - CONTEXT_LENGTH), start),
-      suffix: text.slice(end, end + CONTEXT_LENGTH),
-    },
+    selector: selector.data,
     startOffset: start,
   };
 };

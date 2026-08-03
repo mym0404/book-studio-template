@@ -1,42 +1,23 @@
-import { neon } from '@neondatabase/serverless';
+import { z } from 'zod';
 import {
   type Annotation,
-  isAnnotation,
+  annotationSchema,
 } from '@/feature/annotations/model/annotation';
 import { docsRoute } from '@/feature/common/app';
-import { getDatabaseUrl } from '@/feature/common/database';
-import type { TextQuoteSelector } from '@/feature/reading/model/text-quote-selector';
+import { getDatabase } from '@/feature/common/database';
 
-type AnnotationRow = {
-  comment: string | null;
-  id: string;
-  page_url: string;
-  prefix: string;
-  quote: string;
-  start_offset: number | null;
-  suffix: string;
-};
-
-const isAnnotationRow = (value: unknown): value is AnnotationRow =>
-  typeof value === 'object' &&
-  value !== null &&
-  'id' in value &&
-  typeof value.id === 'string' &&
-  'page_url' in value &&
-  typeof value.page_url === 'string' &&
-  'quote' in value &&
-  typeof value.quote === 'string' &&
-  'prefix' in value &&
-  typeof value.prefix === 'string' &&
-  'suffix' in value &&
-  typeof value.suffix === 'string' &&
-  'start_offset' in value &&
-  (typeof value.start_offset === 'number' || value.start_offset === null) &&
-  'comment' in value &&
-  (typeof value.comment === 'string' || value.comment === null);
-
-const toAnnotation = (row: AnnotationRow): Annotation | undefined => {
-  const annotation = {
+const annotationRowSchema = z
+  .object({
+    comment: z.string().nullable(),
+    id: z.string(),
+    page_url: z.string(),
+    prefix: z.string(),
+    quote: z.string(),
+    start_offset: z.number().nullable(),
+    suffix: z.string(),
+  })
+  .transform((row) => ({
+    ...(row.comment ? { comment: row.comment } : {}),
     id: row.id,
     pageUrl: row.page_url,
     selector: {
@@ -45,14 +26,17 @@ const toAnnotation = (row: AnnotationRow): Annotation | undefined => {
       suffix: row.suffix,
     },
     ...(row.start_offset !== null ? { startOffset: row.start_offset } : {}),
-    ...(row.comment ? { comment: row.comment } : {}),
-  };
+  }))
+  .pipe(annotationSchema);
 
-  return isAnnotation(annotation) ? annotation : undefined;
+const parseAnnotationRow = (row: unknown) => {
+  const result = annotationRowSchema.safeParse(row);
+
+  return result.success ? result.data : undefined;
 };
 
 export const getAnnotations = async ({ pageUrl }: { pageUrl: string }) => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
   const rows = await sql`
     SELECT id, page_url, quote, prefix, suffix, start_offset, comment
     FROM annotations
@@ -61,9 +45,7 @@ export const getAnnotations = async ({ pageUrl }: { pageUrl: string }) => {
   `;
 
   return rows.flatMap((row) => {
-    if (!isAnnotationRow(row)) return [];
-
-    const annotation = toAnnotation(row);
+    const annotation = parseAnnotationRow(row);
 
     return annotation ? [annotation] : [];
   });
@@ -74,7 +56,7 @@ export const getAnnotationsForBook = async ({
 }: {
   bookSlug: string;
 }) => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
   const bookUrl = `${docsRoute}/${bookSlug}`;
   const rows = await sql`
     SELECT id, page_url, quote, prefix, suffix, start_offset, comment
@@ -84,9 +66,7 @@ export const getAnnotationsForBook = async ({
   `;
 
   return rows.flatMap((row) => {
-    if (!isAnnotationRow(row)) return [];
-
-    const annotation = toAnnotation(row);
+    const annotation = parseAnnotationRow(row);
 
     return annotation ? [annotation] : [];
   });
@@ -104,10 +84,10 @@ export const saveAnnotation = async ({
 }: {
   comment?: string;
   pageUrl: string;
-  selector: TextQuoteSelector;
+  selector: Annotation['selector'];
   startOffset: number;
 }) => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
   const [row] = await sql`
     INSERT INTO annotations (
       page_url,
@@ -136,7 +116,7 @@ export const saveAnnotation = async ({
     RETURNING id, page_url, quote, prefix, suffix, start_offset, comment
   `;
 
-  return isAnnotationRow(row) ? toAnnotation(row) : undefined;
+  return parseAnnotationRow(row);
 };
 
 export const updateAnnotationComment = async ({
@@ -146,7 +126,7 @@ export const updateAnnotationComment = async ({
   comment: string;
   id: string;
 }) => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
   const [row] = await sql`
     UPDATE annotations
     SET comment = ${comment}, updated_at = CURRENT_TIMESTAMP
@@ -154,11 +134,11 @@ export const updateAnnotationComment = async ({
     RETURNING id, page_url, quote, prefix, suffix, start_offset, comment
   `;
 
-  return isAnnotationRow(row) ? toAnnotation(row) : undefined;
+  return parseAnnotationRow(row);
 };
 
 export const deleteAnnotation = async ({ id }: { id: string }) => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
   const rows = await sql`
     DELETE FROM annotations
     WHERE id = ${id}

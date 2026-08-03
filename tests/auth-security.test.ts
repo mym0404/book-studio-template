@@ -17,7 +17,7 @@ import { getCookieValue } from '../feature/auth/security';
 import {
   createOpaqueToken,
   hashOpaqueToken,
-  isOpaqueToken,
+  opaqueTokenSchema,
 } from '../feature/auth/tokens';
 import {
   getPublicAssetContentDigest,
@@ -37,8 +37,8 @@ describe('authentication security helpers', () => {
     const first = createOpaqueToken();
     const second = createOpaqueToken();
 
-    assert.equal(isOpaqueToken(first), true);
-    assert.equal(isOpaqueToken(second), true);
+    assert.equal(opaqueTokenSchema.safeParse(first).success, true);
+    assert.equal(opaqueTokenSchema.safeParse(second).success, true);
     assert.notEqual(first, second);
     assert.match(hashOpaqueToken(first), /^[0-9a-f]{64}$/);
     assert.equal(hashOpaqueToken(first), hashOpaqueToken(first));
@@ -65,9 +65,15 @@ describe('authentication security helpers', () => {
   });
 
   it('rejects legacy JWT and malformed opaque tokens', () => {
-    assert.equal(isOpaqueToken('header.payload.signature'), false);
-    assert.equal(isOpaqueToken('short'), false);
-    assert.equal(isOpaqueToken(`${createOpaqueToken()}.`), false);
+    assert.equal(
+      opaqueTokenSchema.safeParse('header.payload.signature').success,
+      false,
+    );
+    assert.equal(opaqueTokenSchema.safeParse('short').success, false);
+    assert.equal(
+      opaqueTokenSchema.safeParse(`${createOpaqueToken()}.`).success,
+      false,
+    );
   });
 
   it('derives the WebAuthn origin and RP ID from SITE_URL', () => {

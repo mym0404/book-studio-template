@@ -7,7 +7,7 @@ import {
   getCookieValue,
   PRIVATE_NO_STORE_HEADERS,
 } from '@/feature/auth/security';
-import { hashOpaqueToken, isOpaqueToken } from '@/feature/auth/tokens';
+import { hashOpaqueToken, opaqueTokenSchema } from '@/feature/auth/tokens';
 
 export const hasOwnerSession = async (requestHeaders: Headers) => {
   const token = getCookieValue(
@@ -15,7 +15,7 @@ export const hasOwnerSession = async (requestHeaders: Headers) => {
     SESSION_COOKIE_NAME,
   );
 
-  if (!token || !isOpaqueToken(token)) return false;
+  if (!token || !opaqueTokenSchema.safeParse(token).success) return false;
 
   return hasStoredSession({ tokenHash: hashOpaqueToken(token) });
 };

@@ -1,52 +1,37 @@
-import { neon } from '@neondatabase/serverless';
-import { getDatabaseUrl } from '@/feature/common/database';
-
-export type ChallengePurpose = 'authentication' | 'registration';
-
-export type OwnerCredential = {
-  counter: number;
-  credentialId: string;
-  publicKey: string;
-};
-
-type OwnerCredentialRow = {
-  counter: string;
-  credential_id: string;
-  public_key: string;
-};
-
-type ChallengeRow = {
-  challenge: string;
-  purpose: ChallengePurpose;
-};
+import { z } from 'zod';
+import {
+  type ChallengePurpose,
+  challengePurposeSchema,
+} from '@/feature/auth/passkey-schema';
+import { getDatabase } from '@/feature/common/database';
 
 const BASE64URL_PATTERN = /^[A-Za-z0-9_-]+$/;
 
-const isOwnerCredentialRow = (value: unknown): value is OwnerCredentialRow =>
-  typeof value === 'object' &&
-  value !== null &&
-  'credential_id' in value &&
-  typeof value.credential_id === 'string' &&
-  BASE64URL_PATTERN.test(value.credential_id) &&
-  'public_key' in value &&
-  typeof value.public_key === 'string' &&
-  BASE64URL_PATTERN.test(value.public_key) &&
-  'counter' in value &&
-  typeof value.counter === 'string' &&
-  /^\d+$/.test(value.counter);
+const ownerCredentialRowSchema = z.object({
+  counter: z.string().regex(/^\d+$/),
+  credential_id: z.string().regex(BASE64URL_PATTERN),
+  public_key: z.string().regex(BASE64URL_PATTERN),
+});
 
-const isChallengeRow = (value: unknown): value is ChallengeRow =>
-  typeof value === 'object' &&
-  value !== null &&
-  'challenge' in value &&
-  typeof value.challenge === 'string' &&
-  'purpose' in value &&
-  (value.purpose === 'authentication' || value.purpose === 'registration');
+const ownerCredentialSchema = z.object({
+  counter: z.number().refine(Number.isSafeInteger),
+  credentialId: z.string(),
+  publicKey: z.string(),
+});
+
+export type OwnerCredential = z.infer<typeof ownerCredentialSchema>;
+
+const challengeRowSchema = z.object({
+  challenge: z.string(),
+  purpose: challengePurposeSchema,
+});
+
+type ChallengeRow = z.infer<typeof challengeRowSchema>;
 
 export const getOwnerCredential = async (): Promise<
   OwnerCredential | undefined
 > => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
   const [row] = await sql`
     SELECT credential_id, public_key, counter::text AS counter
     FROM owner_auth
@@ -54,16 +39,18 @@ export const getOwnerCredential = async (): Promise<
   `;
 
   if (row === undefined) return undefined;
-  if (!isOwnerCredentialRow(row)) throw new Error('Invalid owner auth data');
 
-  const counter = Number(row.counter);
-  if (!Number.isSafeInteger(counter)) throw new Error('Invalid owner counter');
+  const rowResult = ownerCredentialRowSchema.safeParse(row);
+  if (!rowResult.success) throw new Error('Invalid owner auth data');
 
-  return {
-    counter,
-    credentialId: row.credential_id,
-    publicKey: row.public_key,
-  };
+  const credentialResult = ownerCredentialSchema.safeParse({
+    counter: Number(rowResult.data.counter),
+    credentialId: rowResult.data.credential_id,
+    publicKey: rowResult.data.public_key,
+  });
+  if (!credentialResult.success) throw new Error('Invalid owner counter');
+
+  return credentialResult.data;
 };
 
 export const storeChallenge = async ({
@@ -77,9 +64,9 @@ export const storeChallenge = async ({
   purpose: ChallengePurpose;
   tokenHash: string;
 }) => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
 
-  await sql.transaction((transaction) => [
+  await sql.begin((transaction) => [
     transaction`
       DELETE FROM auth_challenges
       WHERE expires_at <= CURRENT_TIMESTAMP
@@ -97,7 +84,7 @@ export const consumeChallenge = async ({
 }: {
   tokenHash: string;
 }): Promise<ChallengeRow | undefined> => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
   const [row] = await sql`
     DELETE FROM auth_challenges
     WHERE token_hash = ${tokenHash}
@@ -106,9 +93,11 @@ export const consumeChallenge = async ({
   `;
 
   if (row === undefined) return undefined;
-  if (!isChallengeRow(row)) throw new Error('Invalid auth challenge data');
 
-  return row;
+  const result = challengeRowSchema.safeParse(row);
+  if (!result.success) throw new Error('Invalid auth challenge data');
+
+  return result.data;
 };
 
 export const hasStoredSession = async ({
@@ -116,7 +105,7 @@ export const hasStoredSession = async ({
 }: {
   tokenHash: string;
 }) => {
-  const sql = neon(getDatabaseUrl());
+  const sql = getDatabase();
   const rows = await sql`
     SELECT token_hash
     FROM auth_sessions
@@ -138,8 +127,8 @@ export const registerOwnerAndCreateSession = async ({
   expiresAt: Date;
   tokenHash: string;
 }) => {
-  const sql = neon(getDatabaseUrl());
-  const [, sessionRows] = await sql.transaction((transaction) => [
+  const sql = getDatabase();
+  const [, sessionRows] = await sql.begin((transaction) => [
     transaction`
       DELETE FROM auth_sessions
       WHERE expires_at <= CURRENT_TIMESTAMP
@@ -175,8 +164,8 @@ export const updateCounterAndCreateSession = async ({
   newCounter: number;
   tokenHash: string;
 }) => {
-  const sql = neon(getDatabaseUrl());
-  const [, sessionRows] = await sql.transaction((transaction) => [
+  const sql = getDatabase();
+  const [, sessionRows] = await sql.begin((transaction) => [
     transaction`
       DELETE FROM auth_sessions
       WHERE expires_at <= CURRENT_TIMESTAMP

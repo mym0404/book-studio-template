@@ -10,6 +10,7 @@ import {
   getPasskeyMode,
   verifyOwnerPasskey,
 } from '@/feature/auth/passkey';
+import { passkeyRequestSchema } from '@/feature/auth/passkey-schema';
 import {
   getCookieValue,
   hasTrustedOrigin,
@@ -17,9 +18,6 @@ import {
 } from '@/feature/auth/security';
 
 export const dynamic = 'force-dynamic';
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
 
 const errorResponse = (status: 400 | 401 | 409 | 503) =>
   new NextResponse(null, {
@@ -51,17 +49,14 @@ export const POST = async (request: NextRequest) => {
   try {
     if (!hasTrustedOrigin(request)) return errorResponse(401);
 
-    const body: unknown = await request.json().catch(() => undefined);
-    if (!isRecord(body)) return errorResponse(400);
+    const bodyResult = passkeyRequestSchema.safeParse(
+      await request.json().catch(() => undefined),
+    );
+    if (!bodyResult.success) return errorResponse(400);
+
+    const body = bodyResult.data;
 
     if (body.action === 'options') {
-      if (
-        body.setupToken !== undefined &&
-        typeof body.setupToken !== 'string'
-      ) {
-        return errorResponse(400);
-      }
-
       const result = await createPasskeyOptions({
         setupToken: body.setupToken,
       });
@@ -82,10 +77,6 @@ export const POST = async (request: NextRequest) => {
       });
 
       return response;
-    }
-
-    if (body.action !== 'verify' || !('response' in body)) {
-      return errorResponse(400);
     }
 
     const challengeToken = getCookieValue(

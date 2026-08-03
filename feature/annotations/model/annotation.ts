@@ -1,46 +1,63 @@
-import {
-  isAnnotationTextQuoteSelector,
-  type TextQuoteSelector,
-} from '@/feature/reading/model/text-quote-selector';
+import { z } from 'zod';
+import { annotationTextQuoteSelectorSchema } from '@/feature/reading/model/text-quote-selector';
 
 export const MAX_ANNOTATION_COMMENT_LENGTH = 2_000;
 
 const ANNOTATION_ANCHOR_PREFIX = 'annotation-';
 
-export type Annotation = {
-  comment?: string;
-  id: string;
-  pageUrl: string;
-  selector: TextQuoteSelector;
-  startOffset?: number;
-};
+export const annotationCommentSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(MAX_ANNOTATION_COMMENT_LENGTH);
 
-export const isAnnotationStartOffset = (value: unknown) =>
-  typeof value === 'number' &&
-  Number.isInteger(value) &&
-  value >= 0 &&
-  value <= 2_147_483_647;
+export const annotationStartOffsetSchema = z.int32().nonnegative();
 
-export const isAnnotationComment = (value: unknown) =>
-  typeof value === 'string' &&
-  value.trim().length > 0 &&
-  value.trim().length <= MAX_ANNOTATION_COMMENT_LENGTH;
+const annotationIdSchema = z
+  .string()
+  .regex(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+  );
 
-export const isAnnotation = (value: unknown): value is Annotation =>
-  typeof value === 'object' &&
-  value !== null &&
-  'id' in value &&
-  typeof value.id === 'string' &&
-  'pageUrl' in value &&
-  typeof value.pageUrl === 'string' &&
-  'selector' in value &&
-  isAnnotationTextQuoteSelector(value.selector) &&
-  (!('startOffset' in value) ||
-    value.startOffset === undefined ||
-    isAnnotationStartOffset(value.startOffset)) &&
-  (!('comment' in value) ||
-    value.comment === undefined ||
-    isAnnotationComment(value.comment));
+export const annotationSchema = z.object({
+  comment: annotationCommentSchema.optional(),
+  id: annotationIdSchema,
+  pageUrl: z.string(),
+  selector: annotationTextQuoteSelectorSchema,
+  startOffset: annotationStartOffsetSchema.optional(),
+});
+
+export type Annotation = z.infer<typeof annotationSchema>;
+
+export const createAnnotationRequestSchema = annotationSchema
+  .pick({
+    comment: true,
+    pageUrl: true,
+    selector: true,
+    startOffset: true,
+  })
+  .required({
+    pageUrl: true,
+    selector: true,
+    startOffset: true,
+  });
+
+export const updateAnnotationRequestSchema = z.object({
+  comment: annotationCommentSchema,
+  id: annotationIdSchema,
+});
+
+export const deleteAnnotationRequestSchema = z.object({
+  id: annotationIdSchema,
+});
+
+export const annotationResponseSchema = z.object({
+  annotation: annotationSchema,
+});
+
+export const annotationListResponseSchema = z.object({
+  annotations: z.array(annotationSchema),
+});
 
 export const getAnnotationAnchorId = ({ id }: { id: string }) =>
   `${ANNOTATION_ANCHOR_PREFIX}${id}`;

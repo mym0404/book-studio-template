@@ -2,38 +2,43 @@
 
 Use this guide when a user asks an AI coding agent to install Book Studio. Own the setup from the repository root and continue until the requested local or production outcome is verified.
 
-The default production path is:
-
-`Vercel project → Vercel Marketplace Neon → database schema → environment → production deployment → owner passkey`
-
 Do not ask the user to create a separate Neon account, copy a database URL, install a CLI, or edit an env file on the happy path. Use a standalone Neon setup only after the Vercel Marketplace path is unavailable and the user approves that fallback.
 
-## User actions only
+## Interaction contract
 
-Ask the user only when a person or a result-changing decision is required:
+### Announce the flow before acting
 
-- Approve Vercel, Git provider, or Marketplace authentication and terms.
-- Choose between multiple plausible Vercel teams, projects, or existing databases.
-- Approve any paid plan. Prefer a no-cost plan when one is available.
-- Complete custom-domain DNS when they explicitly want a custom domain.
-- Complete the passkey prompt on their device.
+Before any setup work, send a short notice adapted from this template:
+
+```text
+I’ll install Book Studio in this order: read-only preflight → local toolchain → Vercel project and Git link → Neon through Vercel Marketplace → database schema → environment → local verification → production deployment → owner passkey → setup-token removal and final verification.
+
+I’ll continue automatically between checkpoints. I’ll pause only for account approvals, the exact Vercel project or Neon resource name when one must be created or selected, the Neon region, any cost, changes to a reused database, and the passkey gesture. I won’t ask you to install CLIs, copy secrets, or edit env files.
+
+I’ll start with read-only checks. Before creating or changing external resources, I’ll show you the exact target and ask for approval.
+```
+
+Start the read-only preflight immediately after this notice. Do not ask a generic “Should I begin?” question. Ask decisions just in time, combine choices needed for the same next action into one question, and continue automatically after the answer. Never ask the user to reconfirm an answered choice or choose a fallback before its failure occurs.
 
 Keep CLI processes alive while the user completes a browser approval, then resume automatically.
 
 ## 1. Establish authority and defaults
 
 1. Read `AGENTS.md`, its relevant routed knowledge documents, `mise.toml`, `package.json`, and `.env.example` in full.
-2. Determine whether the request is local-only or includes production. For an unqualified install request, propose the full production path and ask once for permission to create or connect the Vercel project, connect its Git repository, provision a no-cost Neon Marketplace database, set environment variables, and deploy.
-3. Use these defaults unless the user already chose otherwise:
+2. Determine whether the request is local-only or includes production. For an unqualified install request, use the full production path, send the start notice, and begin read-only preflight without waiting for a reply.
+3. Before the first external write, show the exact known targets and get authorization for the next external action. Ask later result-changing decisions only when they become necessary; do not turn the entire installation into one up-front questionnaire.
+4. Use these defaults unless the user already chose otherwise:
 
-   - Reuse the current Git remote and an exactly matching Vercel project.
-   - Create missing resources under the user's current Vercel scope.
+   - Reuse the current Git remote.
+   - Prefer an exactly matching Vercel project or Neon resource, but identify it by scope and name and confirm it before changing or attaching it.
+   - For a new Vercel project, propose the repository name. For a new Neon resource, propose `<vercel-project>-db`. Require the user to confirm or replace each exact name before creation.
+   - Use the only available Vercel scope. Ask the user to choose only when multiple plausible scopes remain.
    - Use Vercel-managed Neon from the Vercel Marketplace.
-   - Use a no-cost Neon plan and a database region close to the Vercel Functions region.
+   - Propose a no-cost Neon plan and a database region close to the Vercel Functions region. Confirm the region in the same question as a new Neon resource name.
    - Connect the database to Production and Development. Do not connect Preview by default.
    - Use the assigned Vercel production domain. Configure a custom domain only when requested.
 
-4. Recommend a private repository before importing copyrighted, confidential, or personal PDFs. A passkey protects the deployed app, not generated MDX and images committed to Git.
+5. Recommend a private repository before importing copyrighted, confidential, or personal PDFs. A passkey protects the deployed app, not generated MDX and images committed to Git.
 
 ## 2. Install the local toolchain
 
@@ -65,25 +70,27 @@ A guidance plugin does not prove that account actions are available. Confirm the
 
 ## 4. Link the Vercel project and Git repository
 
-1. Inspect the Git remote, any ignored `.vercel` link, and Vercel projects connected to the same repository before creating anything.
-2. Reuse one exact match. If there are multiple matches, different scopes, or a link to another repository, ask the user to choose before relinking.
-3. If authentication is missing, start the Vercel login or OAuth flow and ask the user only to approve it.
-4. Create a Vercel project only when no exact match exists, then link the repository root to it.
-5. Connect the current Git remote to the Vercel project so later pushes deploy through Vercel Git integration.
-6. Confirm the linked Vercel scope, project ID, repository, framework, and root directory without exposing credentials.
+1. Inspect the Git remote and any ignored `.vercel` link before creating anything.
+2. If authentication is missing, start the Vercel login or OAuth flow and ask the user only to approve it.
+3. List plausible Vercel scopes and projects connected to the same repository.
+4. If there is one exact match, show its scope and project name and ask once to use it for linking, Git connection, environment changes, and deployment. If there are multiple matches or a link to another repository, present only the plausible choices and ask the user to select one.
+5. If no exact match exists, propose the repository name as the Vercel project name. Ask for the exact project name, ask for the target scope only when multiple scopes are plausible, and include permission to create the project, connect the current Git remote, configure it, and deploy. Do not create a project until the user answers.
+6. Create or link only the confirmed project, then connect the current Git remote so later pushes deploy through Vercel Git integration.
+7. Confirm the linked Vercel scope, project ID, repository, framework, and root directory without exposing credentials.
 
 Use Vercel account tools when available. The CLI fallback is `vercel link` followed by `vercel git connect`; inspect each command's current `--help` instead of assuming flags.
 
 ## 5. Provision Neon through Vercel Marketplace
 
-1. List Neon Marketplace resources already installed for the linked project and team. Reuse an existing resource only when its ownership and target database are unambiguous.
-2. Discover the current Neon product, plan, and metadata options before provisioning. Agent-detected Vercel CLI sessions may be non-interactive, so inspect `vercel integration add neon --help` and pass every required plan or region value explicitly.
-3. Provision the official `neon` integration in **Create New Neon Account** mode. Keep the resource Vercel-managed; linking an independent Neon account is a different fallback.
-4. Use a no-cost plan when offered. Stop for approval before any paid plan or when the free quota is exhausted.
-5. Match the database region to the Vercel Functions region when possible.
-6. Connect the resource to Production and Development without an env prefix. This app reads the exact name `DATABASE_URL`.
-7. Let the integration inject environment variables. If `.env.local` does not exist, allow its automatic env pull. If the file exists, disable the automatic pull and merge later so no user values are overwritten.
-8. Verify by variable name, never value, that the linked project has `DATABASE_URL` for Production and Development. The Marketplace value should be a pooled Neon connection string; do not replace it manually.
+1. List Neon Marketplace resources already installed for the linked project and team before provisioning anything.
+2. Discover the current Neon product, plan, region, and metadata options before asking the user or provisioning. Agent-detected Vercel CLI sessions may be non-interactive, so inspect `vercel integration add neon --help` and pass every required plan or region value explicitly.
+3. If one resource is an exact match, show its name, ownership, target database, region, plan, and project connection and ask once to reuse it. If multiple plausible resources remain, present only those matches and ask the user to choose.
+4. If no exact match exists, propose `<vercel-project>-db`, a no-cost plan, and the region closest to the Vercel Functions region. In one question, ask for the exact Neon Marketplace resource name and confirmation of the proposed region. If the current Marketplace flow exposes a separate database-name field, ask for that name in the same question; otherwise do not invent another naming decision. Include plan and cost approval in this question when no no-cost plan is available.
+5. Provision the official `neon` integration in **Create New Neon Account** mode using the confirmed name. Keep the resource Vercel-managed; linking an independent Neon account is a different fallback.
+6. Use the confirmed plan and region. Stop again if provisioning presents a different price, plan, or region from the values the user confirmed.
+7. Connect the resource to Production and Development without an env prefix. This app reads the exact name `DATABASE_URL`.
+8. Let the integration inject environment variables. If `.env.local` does not exist, allow its automatic env pull. If the file exists, disable the automatic pull and merge later so no user values are overwritten.
+9. Verify by variable name, never value, that the linked project has `DATABASE_URL` for Production and Development. The Marketplace value should be a pooled Neon connection string; do not replace it manually.
 
 The CLI path starts with `vercel integration list`, `vercel integration discover`, and `vercel integration add neon`. Use the dashboard path `Marketplace → Neon → Install → Connect Project` when CLI provisioning is unavailable.
 
@@ -93,7 +100,7 @@ If Marketplace terms or account approval opens in a browser, keep the provisioni
 
 Marketplace provisioning creates the database and credentials, but it does not apply the application schema owned by the Database knowledge document.
 
-1. Confirm that the target is the newly provisioned empty database. For a reused database, follow the Database knowledge document before changing it.
+1. Confirm that the target is the newly provisioned empty database. For a reused database, inspect its schema, present the findings, and get explicit approval before applying SQL, as required by the Database knowledge document.
 2. Execute the complete migration owned by the Database knowledge document against the exact Marketplace database using the first secure capability available:
 
    - An authenticated database query tool exposed by Vercel or the installed agent.
@@ -162,7 +169,7 @@ Fix only failures caused by installation. Report pre-existing failures separatel
 | Multiple Vercel scopes or matching projects exist | Present only the plausible matches | Choose one |
 | Marketplace terms block provisioning | Open the exact approval page and keep the CLI alive | Review and accept terms |
 | A paid plan is required or free quota is exhausted | Stop before provisioning another resource | Approve cost or choose an existing resource |
-| A Neon resource already exists | Verify ownership, project connection, and env source before reuse | Choose only if multiple matches remain |
+| A Neon resource already exists | Verify ownership, project connection, and env source before reuse | Confirm reuse, or choose if multiple matches remain |
 | `DATABASE_URL` was not injected | Reconnect the existing resource, select Production and Development, then pull again | None unless team permission is missing |
 | Env pull would overwrite `.env.local` | Pull to an ignored temporary file and merge required keys | None |
 | No automated SQL executor is available | Open Vercel's database Query screen with the migration ready | Paste the file and select **Run** |

@@ -4,6 +4,14 @@ Book Studio turns PDFs into a private reading site with searchable chapters, rea
 
 Generated MDX and images are committed to Git. Use a private repository for copyrighted, confidential, or personal material.
 
+## Features
+
+- **Private Bookshelf** — Keep a single-owner library protected by a passkey.
+- **Ready-to-Use PDF Import Skill** — Turn a PDF into a structured, source-checked book with `$import-book`.
+- **Highlights & Comments** — Highlight passages and attach comments while you read.
+- **Continue Reading** — Resume from your latest reading position.
+- **Page Sharing** — Publish one specific page at a time with a stable public link.
+
 ## Get Started
 
 1. Open [Book Studio](https://github.com/mym0404/book-studio-template), select **Use this template**, and create your repository.

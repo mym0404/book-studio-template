@@ -17,6 +17,8 @@
 </p>
 
 <p align="center">
+  <a href="https://book-studio-sample.vercel.app">View sample</a>
+  ·
   <a href="https://github.com/mym0404/book-studio-template/generate">
     <img src="https://img.shields.io/badge/Use_this_template-181717?style=for-the-badge&amp;logo=github&amp;logoColor=white" alt="Use this template">
   </a>
@@ -33,6 +35,13 @@
 </p>
 
 ---
+
+## Screenshots
+
+| | Light | Dark |
+| --- | --- | --- |
+| **Desktop** | <img src="./public/screenshots/light-desktop-comment.jpg" alt="Light desktop view of Modules Should Be Deep with a highlighted passage and open comment" width="640"> | <img src="./public/screenshots/dark-desktop-reader-settings.jpg" alt="Dark desktop view of The Four Fundamental Subspaces with reader settings open beside rendered equations" width="640"> |
+| **Mobile** | <img src="./public/screenshots/light-mobile-comment.jpg" alt="Light mobile view of Bad Smells in Code with a highlighted passage and open comment" width="320"> | <img src="./public/screenshots/dark-mobile-library.jpg" alt="Dark mobile view of the book switcher listing all three sample books" width="320"> |
 
 > [!IMPORTANT]
 > Generated MDX and images are committed to Git. Use a private repository for copyrighted, confidential, or personal material.

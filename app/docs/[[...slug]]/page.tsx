@@ -12,11 +12,7 @@ import { PageAnnotations } from '@/feature/annotations/ui/page-annotations';
 import { requireOwnerPage } from '@/feature/auth/session';
 import { appName } from '@/feature/common/app';
 import { getBookSlugForPathname } from '@/feature/library/books';
-import {
-  getPageImage,
-  getPageMarkdownUrl,
-  source,
-} from '@/feature/library/source';
+import { getPageMarkdownUrl, source } from '@/feature/library/source';
 import { getMDXComponents } from '@/feature/library/ui/mdx';
 import { getReadingProgressTarget } from '@/feature/reading/model/reading-progress';
 import { ReadingProgress } from '@/feature/reading/ui/reading-progress';
@@ -91,8 +87,6 @@ export const generateMetadata = async (
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
-  const imageUrl = getPageImage(page).url;
-
   return {
     title: page.data.title,
     description: page.data.description,
@@ -102,13 +96,11 @@ export const generateMetadata = async (
       siteName: appName,
       locale: 'en_US',
       type: 'article',
-      images: imageUrl,
     },
     twitter: {
-      card: 'summary_large_image',
+      card: 'summary',
       title: page.data.title,
       description: page.data.description,
-      images: imageUrl,
     },
   };
 };

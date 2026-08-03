@@ -25,9 +25,6 @@ const config = {
         '/api/search',
         '/books/:path*',
         '/llms.mdx/:path*',
-        '/og/:path*',
-        '/opengraph-image',
-        '/twitter-image',
       ].map((source) => ({
         source,
         headers: [

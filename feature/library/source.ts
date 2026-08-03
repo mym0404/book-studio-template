@@ -4,11 +4,7 @@ import { loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { Bookmark } from 'lucide-react';
 import { createElement } from 'react';
-import {
-  docsContentRoute,
-  docsImageRoute,
-  docsRoute,
-} from '@/feature/common/app';
+import { docsContentRoute, docsRoute } from '@/feature/common/app';
 
 export const source = loader({
   baseUrl: docsRoute,
@@ -74,15 +70,6 @@ export const getBookPageUrls = ({ bookSlug }: { bookSlug: string }) => {
   return book.children.flatMap((node) =>
     node.type === 'page' ? [node.url] : [],
   );
-};
-
-export const getPageImage = (page: (typeof source)['$inferPage']) => {
-  const segments = [...page.slugs, 'image.png'];
-
-  return {
-    segments,
-    url: `${docsImageRoute}/${segments.join('/')}`,
-  };
 };
 
 export const getPageMarkdownUrl = (page: (typeof source)['$inferPage']) => {

@@ -1,7 +1,6 @@
 export const appName = 'Book Studio';
 export const appDescription = 'A private reading library built from your PDFs.';
 export const docsRoute = '/docs';
-export const docsImageRoute = '/og/docs';
 export const docsContentRoute = '/llms.mdx/docs';
 export const publicPageRoute = '/public';
 export const publicAssetRoute = '/public-assets';

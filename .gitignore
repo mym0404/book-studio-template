@@ -1,0 +1,34 @@
+# deps
+/node_modules
+
+# generated content
+.source
+/output/
+
+# test & build
+/coverage
+/.playwright-cli/
+/.next/
+/out/
+/build
+*.tsbuildinfo
+
+# misc
+.DS_Store
+*.pem
+/tmp/
+/.pnp
+.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# others
+.env
+.env.*
+!.env.example
+/.vercel/
+/books/
+/mise.local.lock
+/mise.local.toml
+next-env.d.ts

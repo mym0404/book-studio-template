@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@v4
+        with:
+          cache: true
+      - run: mise exec -- pnpm install --frozen-lockfile
+      - run: mise exec -- pnpm lint
+      - run: mise exec -- pnpm test
+      - run: mise exec -- pnpm types:check
+      - run: mise exec -- pnpm build
+      - name: Check PDF tooling
+        run: |
+          test "$(mise exec -- uv run .agents/skills/import-book/scripts/pdf_tool.py page-count examples/sample-book.pdf)" -ge 2
+          mise exec -- uv run .agents/skills/import-book/scripts/pdf_tool.py render examples/sample-book.pdf --pages 1,2 --output-dir /tmp/book-studio-pdf-smoke
+          test -s /tmp/book-studio-pdf-smoke/page-0001.png
+          test -s /tmp/book-studio-pdf-smoke/page-0002.png
+          ! mise exec -- uv run .agents/skills/import-book/scripts/pdf_tool.py render examples/sample-book.pdf --pages 0 --output-dir /tmp/book-studio-pdf-smoke
+      - name: Scan committed content for secrets
+        run: mise exec -- gitleaks git --redact --no-banner .

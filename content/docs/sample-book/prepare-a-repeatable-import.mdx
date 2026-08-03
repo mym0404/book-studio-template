@@ -1,0 +1,30 @@
+---
+title: Prepare a repeatable import
+description: Keep the source stable and know which generated artifacts belong in Git.
+icon: FileInput
+---
+
+A useful import starts with a stable source and a stable book slug. Keep your original PDF in the local `books` directory, then let the agent create reviewable MDX and image assets. The source PDF does not need to enter Git.
+
+## Install the pinned tools
+
+```bash title="Terminal"
+mise install
+pnpm install --frozen-lockfile
+uv run .agents/skills/import-book/scripts/run_docling.py examples/sample-book.pdf --book-slug sample-book
+```
+
+The command produces a Docling bundle for the agent to inspect. It is evidence, not the final book. The agent still compares each section with rendered PDF pages before publishing MDX.
+
+## Know what belongs in Git
+
+| Artifact | Purpose | Tracked in Git |
+| --- | --- | --- |
+| Original PDF | Local source for the agent | No |
+| MDX | Book pages rendered by the site | Yes |
+| PNG assets | Figures used by the book pages | Yes |
+| Docling output | Temporary conversion evidence | No |
+
+<Callout type="warn" title="Repository visibility is separate from web access">
+  The passkey protects production routes. If generated MDX and images contain sensitive material, keep the Git repository private as well.
+</Callout>

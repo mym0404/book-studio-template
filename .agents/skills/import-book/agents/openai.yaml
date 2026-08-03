@@ -1,0 +1,7 @@
+interface:
+  display_name: "Import Book"
+  short_description: "PDF 책을 Docling과 원문 대조로 Fumadocs에 가져오기"
+  default_prompt: "Use $import-book to import the provided PDF into this project’s Fumadocs documentation."
+
+policy:
+  allow_implicit_invocation: false

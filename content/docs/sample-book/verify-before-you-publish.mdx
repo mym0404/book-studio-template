@@ -1,0 +1,22 @@
+---
+title: Verify before you publish
+description: Compare the source PDF with its MDX and run the repository checks.
+icon: ListChecks
+---
+
+A finished import should be easy to audit. Check the source page count, render the pages that contain tables or figures, and compare them with the corresponding MDX. Run the repository checks only after the content comparison passes.
+
+![Import flow from a local PDF through an AI agent to tracked content and a private reader](/books/sample-book/workflow/import-flow.png)
+
+*One local source becomes reviewable content and a protected reader.*
+
+## Final review
+
+- Every published section has a matching source range.
+- Figures use stable paths under `content-assets/books`.
+- `pnpm lint`, `pnpm test`, `pnpm types:check`, and `pnpm build` pass.
+- `SITE_URL` matches the production origin before passkey setup.
+
+<Callout type="success" title="Result">
+  The sample is complete when the PDF has three pages, the figure is legible, the MDX builds, and private routes require the owner's passkey in production.
+</Callout>

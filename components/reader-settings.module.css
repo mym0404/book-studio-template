@@ -1,0 +1,92 @@
+.readerLayout [data-reading-content],
+.fontOption[data-reader-font-option='wanted-sans'] {
+  font-family:
+    var(--font-wanted-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Noto Sans', Helvetica, Arial, sans-serif;
+}
+
+:global(html[data-reader-font='system-sans'])
+  .readerLayout
+  [data-reading-content],
+.fontOption[data-reader-font-option='system-sans'] {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica,
+    Arial, sans-serif;
+}
+
+:global(html[data-reader-font='system-serif'])
+  .readerLayout
+  [data-reading-content],
+.fontOption[data-reader-font-option='system-serif'] {
+  font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+}
+
+.readerLayout [data-reading-content] {
+  --tw-prose-size: 1;
+  line-height: 1.75;
+}
+
+:global(html[data-reader-size='14']) .readerLayout [data-reading-content] {
+  --tw-prose-size: 0.875;
+}
+
+:global(html[data-reader-size='18']) .readerLayout [data-reading-content] {
+  --tw-prose-size: 1.125;
+}
+
+:global(html[data-reader-size='20']) .readerLayout [data-reading-content] {
+  --tw-prose-size: 1.25;
+}
+
+:global(html[data-reader-size='22']) .readerLayout [data-reading-content] {
+  --tw-prose-size: 1.375;
+}
+
+:global(html[data-reader-line-height='1.5'])
+  .readerLayout
+  [data-reading-content] {
+  line-height: 1.5;
+}
+
+:global(html[data-reader-line-height='2'])
+  .readerLayout
+  [data-reading-content] {
+  line-height: 2;
+}
+
+.readerLayout [data-reading-content] :where(code, pre) {
+  font-family: var(--font-mono);
+}
+
+.readerLayout :global(#nd-subnav),
+.readerLayout :global([data-toc-popover]) {
+  transition-duration: 180ms;
+  transition-property:
+    transform, opacity, color, background-color, border-color;
+  transition-timing-function: ease-out;
+  will-change: transform;
+}
+
+.readerLayout
+  :global(#nd-subnav[data-reader-hidden='true']:not(:focus-within)) {
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(calc(-100% - var(--fd-docs-row-1)));
+}
+
+@media (max-width: 47.999rem) {
+  .readerLayout
+    :global(#nd-subnav[data-reader-hidden='true'])
+    ~ :global([data-toc-popover]:not(:focus-within)) {
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(calc(-100% - var(--fd-docs-row-2)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .readerLayout :global(#nd-subnav),
+  .readerLayout :global([data-toc-popover]) {
+    transition-duration: 0ms;
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "title": "Book Studio Sample",
+  "description": "A short example of turning a PDF into a private reading site.",
+  "icon": "BookOpen",
+  "root": true,
+  "pages": ["index", "prepare-a-repeatable-import", "verify-before-you-publish"]
+}

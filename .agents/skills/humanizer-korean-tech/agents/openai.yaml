@@ -1,0 +1,7 @@
+interface:
+  display_name: "Humanizer Korean Tech"
+  short_description: "한국어 의미와 구조를 지키며 AI 문체·번역투·맞춤법을 교정"
+  default_prompt: "Use $humanizer-korean-tech to polish this Korean text while preserving its meaning and structure."
+
+policy:
+  allow_implicit_invocation: true

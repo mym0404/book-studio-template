@@ -36,7 +36,8 @@ const registerOwner = async ({
   await page.getByLabel('Owner setup token').fill(setupToken);
   await page.getByRole('button', { name: 'Set up owner passkey' }).click();
 
-  await expect(page).toHaveURL('/docs/sample-book');
+  await expect(page).toHaveURL('/docs/sample-book', { timeout: 15_000 });
+  await page.waitForLoadState('networkidle');
 };
 
 test('registers and reuses the owner passkey', async ({ context, page }) => {

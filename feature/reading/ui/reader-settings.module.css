@@ -77,7 +77,7 @@
 @media (max-width: 47.999rem) {
   .readerLayout
     :global(#nd-subnav[data-reader-hidden='true'])
-    ~ :global([data-toc-popover]:not(:focus-within)) {
+    ~ :global([data-toc-popover]:not(:has(:focus-visible))) {
     pointer-events: none;
     opacity: 0;
     transform: translateY(calc(-100% - var(--fd-docs-row-2)));

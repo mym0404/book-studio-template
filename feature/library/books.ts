@@ -2,8 +2,9 @@ import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
 import { docsRoute } from '@/feature/common/app';
 import { source } from '@/feature/library/source';
 
-const getBookUrls = () =>
-  getLayoutTabs(source.getPageTree()).map(({ url }) => url);
+export const getBooks = () => getLayoutTabs(source.getPageTree());
+
+const getBookUrls = () => getBooks().map(({ url }) => url);
 
 export const getBookSlugForPathname = ({ pathname }: { pathname: string }) => {
   const bookUrl = getBookUrls().find(

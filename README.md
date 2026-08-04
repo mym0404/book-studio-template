@@ -57,6 +57,7 @@
 | **Highlights & Comments** | Highlight passages and attach comments while you read. |
 | **Continue Reading** | Resume from your latest reading position. |
 | **Page Sharing** | Publish one specific page at a time with a stable public link. |
+| **Theme Variants** | Choose from 11 bundled Fumadocs themes by changing one CSS import. |
 
 ## Deployment
 
@@ -87,6 +88,22 @@ Book Studio requires an HTTPS origin, a server-capable Next.js runtime, and Post
    ```text
    Read .agents/install-guide.md and install Book Studio.
    ```
+
+## Themes
+
+Change only the theme name in `app/global.css` and keep the preset import:
+
+```css
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/solar.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+Replace `solar` with one of the 11 bundled themes: `neutral`, `black`, `vitepress`, `dusk`, `catppuccin`, `ocean`, `purple`, `solar`, `emerald`, `ruby`, or `aspen`.
+
+The gallery shows the same mobile page in dark mode with each theme.
+
+![All 11 Fumadocs themes rendered in dark mode on mobile](./public/screenshots/fumadocs-theme-gallery.png)
 
 ## License
 

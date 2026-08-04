@@ -11,6 +11,20 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: book_studio_e2e
+          POSTGRES_PASSWORD: book_studio
+          POSTGRES_USER: book_studio
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v7
         with:
@@ -21,6 +35,8 @@ jobs:
       - run: pnpm test
       - run: pnpm types:check
       - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
       - name: Check PDF tooling
         run: |
           test "$(uv run .agents/skills/import-book/scripts/pdf_tool.py page-count examples/sample-book.pdf)" -ge 2

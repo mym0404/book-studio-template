@@ -1,0 +1,12 @@
+.git
+.next
+.source
+.vercel
+node_modules
+.env*
+books
+output
+tmp
+*.tsbuildinfo
+mise.local.*
+next-env.d.ts

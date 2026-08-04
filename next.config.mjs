@@ -4,6 +4,8 @@ const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 const config = {
+  output:
+    process.env.BOOK_STUDIO_OUTPUT === 'standalone' ? 'standalone' : undefined,
   reactStrictMode: true,
   outputFileTracingIncludes: {
     '/books/*': ['./content-assets/books/**/*'],

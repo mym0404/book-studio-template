@@ -32,8 +32,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js_16-000000?style=flat-square&amp;logo=nextdotjs&amp;logoColor=white" alt="Next.js 16">
   <img src="https://img.shields.io/badge/Fumadocs-111827?style=flat-square" alt="Fumadocs">
-  <img src="https://img.shields.io/badge/Neon-00E699?style=flat-square&amp;logo=neon&amp;logoColor=black" alt="Neon">
-  <img src="https://img.shields.io/badge/Vercel-000000?style=flat-square&amp;logo=vercel&amp;logoColor=white" alt="Vercel">
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&amp;logo=postgresql&amp;logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker">
 </p>
 
 ---
@@ -58,12 +58,18 @@
 | **Continue Reading** | Resume from your latest reading position. |
 | **Page Sharing** | Publish one specific page at a time with a stable public link. |
 
-## Constraints
+## Deployment
 
-> [!NOTE]
-> The built-in installation flow currently requires **Vercel** and a **Neon database provisioned through the Vercel Marketplace**.
->
-> You can freely clone the repository and adapt it to your own infrastructure instead.
+Book Studio requires an HTTPS origin, a server-capable Next.js runtime, and PostgreSQL. The installation guide asks which supported path to use before changing external infrastructure.
+
+| Path | Support | Notes |
+| --- | --- | --- |
+| **Vercel + Neon** | Guided | Lowest operations; provisions Neon through Vercel Marketplace. |
+| **Docker + managed PostgreSQL** | Guided | Portable across managed hosts that build the repository Dockerfile, such as Cloud Run, Fly.io, Railway, and Render. |
+| **Docker on Kubernetes or a VPS** | Compatible | Operator-managed; you own ingress, TLS, rollouts, logs, and host maintenance. |
+| **Node.js server + PostgreSQL** | Compatible | Run `pnpm build` and `pnpm start`; infrastructure setup is manual. |
+| **Platform-specific Next.js adapter** | Provider-dependent | Confirm Next.js 16, Node.js APIs, filesystem assets, streaming, and route-handler support with the provider. |
+| **Static export** | Not supported | Passkey authentication, private assets, API routes, and database-backed state require a server. |
 
 ## Get Started
 

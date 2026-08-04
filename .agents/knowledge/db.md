@@ -16,6 +16,21 @@ This document owns PostgreSQL provider portability, connection configuration, pe
 - Do not run it against an existing database until its current schema and ownership are confirmed. `CREATE TABLE IF NOT EXISTS` does not repair incompatible tables.
 - A valid installation contains `reading_progress`, `annotations`, `public_pages`, `owner_auth`, `auth_sessions`, and `auth_challenges`.
 
+## Owner Recovery
+
+The owner credential is bound to the WebAuthn relying-party hostname derived from `SITE_URL`. Recovery is required when no registered passkey is available or an existing database moves to a different canonical hostname.
+
+Recovery deletes the registered credential and every active owner session, but leaves books, reading progress, annotations, and public-page state intact. Verify the exact database, get explicit confirmation, configure a temporary setup token on the running production service, and confirm only that its variable name is active. Then run this transaction as one unit:
+
+```sql
+BEGIN;
+DELETE FROM auth_challenges;
+DELETE FROM owner_auth WHERE id = 1;
+COMMIT;
+```
+
+Deleting `owner_auth` removes `auth_sessions` through its foreign-key cascade. Confirm that `owner_auth`, `auth_sessions`, and `auth_challenges` contain no rows, register the replacement passkey, remove the setup token, restart or redeploy, and verify authentication.
+
 ## Local PostgreSQL
 
 With Docker installed, start a local development database:

@@ -18,7 +18,9 @@
 
 <p align="center">
   <a href="https://book-studio-sample.vercel.app">View sample</a>
-  ·
+</p>
+
+<p align="center">
   <a href="https://github.com/mym0404/book-studio-template/generate">
     <img src="https://img.shields.io/badge/Use_this_template-181717?style=for-the-badge&amp;logo=github&amp;logoColor=white" alt="Use this template">
   </a>
